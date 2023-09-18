@@ -1,0 +1,4 @@
+1 xa psychicv.xa 1 0
+1 xa psychici.xa 1 1
+1 xa wilterv.xa 1 2
+1 xa wilteri.xa 1 3

@@ -1,0 +1,10 @@
+Achievements list
+1: Beat the mind games full week
+2: No miss the mind games full week
+3: No miss psychic
+4: No miss wilter
+5: No miss uproar
+6: 3ds user? turn on low quality mode
+7: Unlock the mind games demo
+8: ??????
+9: Debugger enter the debug menu
