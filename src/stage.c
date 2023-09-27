@@ -20,6 +20,7 @@
 #include "menu.h"
 #include "trans.h"
 #include "loadscr.h"
+#include "str.h"
 
 #include "object/combo.h"
 #include "object/splash.h"
@@ -1852,6 +1853,13 @@ void Stage_Load(StageId id, StageDiff difficulty, boolean story)
     stage.stage_def = &stage_defs[stage.stage_id = id];
     stage.stage_diff = difficulty;
     stage.story = story;
+    stage.song_completed = false;
+
+    // Dont play str if song has been reloaded
+    if (stage.trans != StageTrans_Reload)
+    {
+        Str_CanPlayBegin();
+    }
     
     //Load HUD textures
     Gfx_LoadTex(&stage.tex_hud0, IO_Read("\\STAGE\\HUD0.TIM;1"), GFX_LOADTEX_FREE);
@@ -1953,6 +1961,10 @@ static boolean Stage_NextLoad(void)
     {
         //Get stage definition
         stage.stage_def = &stage_defs[stage.stage_id = stage.stage_def->next_stage];
+
+        Str_CanPlayBegin();
+
+        stage.song_completed = false;
         
         //Load stage background
         if (load & STAGE_LOAD_STAGE)
@@ -2047,6 +2059,11 @@ void Stage_Tick(void)
             case StageTrans_Menu:
                 //Load appropriate menu
                 Stage_Unload();
+
+                if (stage.song_completed)
+                {
+                    Str_CanPlayFinal();
+                }
                 
                 LoadScr_Start();
                 #ifdef PSXF_NETWORK
@@ -2708,8 +2725,7 @@ void Stage_Tick(void)
 				    	}
 				    	if (stage.stage_id == StageId_1_3)
 				    	{
-				    		//WriteSaveDataStructToBinaryAndSaveItOnTheFuckingMemoryCard();
-		            			stage.prefs.bweek_awards =true;
+		            	    stage.prefs.bweek_awards =true;
 				    		if(stage.misses == 0)
 				    		{
 				    		stage.prefs.mup_awards =true;
@@ -2742,6 +2758,7 @@ void Stage_Tick(void)
                     //Transition to menu or next song
                     if (stage.story && stage.stage_def->next_stage != stage.stage_id)
                     {
+                        stage.song_completed = true;
                         if (Stage_NextLoad())
                             goto SeamLoad;
                     }
@@ -2750,8 +2767,7 @@ void Stage_Tick(void)
                     	{
 		            	if(stage.story && stage.stage_id == StageId_2_2)
 		            		{ 
-		            			//WriteSaveDataStructToBinaryAndSaveItOnTheFuckingMemoryCard();
-		            			stage.prefs.bdweek_awards =true;
+		            		    stage.prefs.bdweek_awards =true;
 		            		}
 		            	if (stage.stage_diff == StageDiff_Hard)
 		            	{
@@ -2769,6 +2785,8 @@ void Stage_Tick(void)
 				    	}
 		            	}
                     	}
+
+                        stage.song_completed = true;
                         stage.trans = StageTrans_Menu;
                         Trans_Start();
                     }

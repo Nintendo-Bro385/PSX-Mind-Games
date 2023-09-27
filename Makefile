@@ -13,6 +13,7 @@ SRCS = src/main.c \
        src/save.c \
        src/pause.c \
        src/psx/psx.c \
+       src/psx/str.c \
        src/psx/io.c \
        src/psx/gfx.c \
        src/psx/audio.c \
@@ -47,6 +48,8 @@ SRCS = src/main.c \
        src/object.c \
        src/object/combo.c \
        src/object/splash.c \
+       src/psn00b/vlc.c \
+       src/psn00b/vlc2.s \
        mips/common/crt0/crt0.s
 
 CPPFLAGS += -Wall -Wextra -pedantic -mno-check-zero-division

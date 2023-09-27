@@ -12,6 +12,7 @@
 #include "audio.h"
 #include "pad.h"
 #include "network.h"
+#include "str.h"
 
 #include "menu.h"
 #include "stage.h"
@@ -67,6 +68,7 @@ int main(int argc, char **argv)
 	StartCARD();
 	_bu_init();
 	Network_Init();
+	Str_Init();
 	
 	Timer_Init();
 	
