@@ -23,6 +23,7 @@ typedef struct {
 
 void defaultSettings();
 boolean readSaveFile();
+boolean MemoryCardExists(void);
 void WriteSaveDataStructToBinaryAndSaveItOnTheFuckingMemoryCard();
 
 #endif

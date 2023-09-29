@@ -172,7 +172,7 @@ typedef struct
 		boolean ghost, downscroll, botplay, lowquality, secretunlocked, secretunlocked2, expsync;
 		int menumusic;
 		//int psymisses, wiltmisses, uproarmisses;
-		boolean bweek_awards, mpsy_awards, mwilt_awards, mup_awards, dsu_awards, udemo_awards, bdweek_awards, flopg_awards, debugger_awards, nomissfw, nomissdw;
+		boolean bweek_awards, mpsy_awards, mwilt_awards, mup_awards, dsu_awards, udemo_awards, bdweek_awards, flopg_awards, debugger_awards, nomissfw, nomissdw, no_memory_card;
 	}prefs;
 	
 	s32 mode;

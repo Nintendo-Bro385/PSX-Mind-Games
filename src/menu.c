@@ -443,9 +443,19 @@ void Menu_Load(MenuPage page)
 {	
     if (loadsaveonce == false)
     {
-    readSaveFile();
-    loadsaveonce = true;
+        if (!MemoryCardExists())
+        {
+            UnlockEverything();
+        }
+
+        else
+        {
+        readSaveFile();
+        }
+
+        loadsaveonce = true;
     }
+
     if (stage.upscroll == 1)
     {
     stage.prefs.downscroll =1;
@@ -883,23 +893,23 @@ void Menu_Tick(void)
                 {
                 	if (pad_state.press & (PAD_START | PAD_CROSS))
 		        	{
-		        		stage.prefs.bweek_awards =true;
+    		        	stage.prefs.bweek_awards =true;
 
-					stage.prefs.mpsy_awards =true;
+    					stage.prefs.mpsy_awards =true;
 
-					stage.prefs.mwilt_awards =true;
+    					stage.prefs.mwilt_awards =true;
 
-					stage.prefs.mup_awards =true;
+    					stage.prefs.mup_awards =true;
 
-					stage.prefs.dsu_awards =true;
+    					stage.prefs.dsu_awards =true;
 
-					//stage.prefs.udemo_awards =true;
-					
-					stage.prefs.bdweek_awards =true;
+    					//stage.prefs.udemo_awards =true;
+    					
+    					stage.prefs.bdweek_awards =true;
 
-					stage.prefs.flopg_awards =true;
-				 	
-				 	stage.prefs.debugger_awards =true;
+    					stage.prefs.flopg_awards =true;
+    				 	
+    				 	stage.prefs.debugger_awards =true;
 		        	}
                 }
                 else if (menu.select == 3)
@@ -1022,41 +1032,129 @@ void Menu_Tick(void)
             	iconlock2 = 4;
             }
 
-		if(stage.prefs.bweek_awards ==true){wicon=11; fwt="Beaten Mind Games Full Week"; Menu_DrawHealth(5, 107, 8, true);}
-		else{wicon=10; fwt="?";}
+    		if (stage.prefs.bweek_awards == true)
+            {
+                wicon=11; 
+                fwt="Beaten Mind Games Full Week"; 
 
-		if(stage.prefs.mpsy_awards ==true){mpicon=13; nmpt="No Missed psychic";}
-		else{mpicon=10; nmpt="?";}
+                if (!stage.prefs.no_memory_card)
+                {
+                    Menu_DrawHealth(5, 107, 8, true);
+                }
+            }
+    		else
+            {
+                wicon=10; 
+                fwt="?";
+            }
 
-		if(stage.prefs.mwilt_awards ==true){mwticon=14; nmwilt="No Missed Wilter";}
-		else{mwticon=10; nmwilt="?";}
+    		if (stage.prefs.mpsy_awards == true)
+            {
+                mpicon=13; 
+                nmpt="No Missed psychic";
+            }
+    		else
+            {
+                mpicon=10; 
+                nmpt="?";
+            }
 
-		if(stage.prefs.mup_awards ==true){muicon=15; nmut="No Missed Uproar";}
-		else{muicon=10; nmut="?";}
+    		if (stage.prefs.mwilt_awards == true)
+            {
+                mwticon=14; 
+                nmwilt="No Missed Wilter";
+            }
+    		else
+            {
+                mwticon=10; 
+                nmwilt="?";
+            }
 
-		if(stage.prefs.dsu_awards ==true){duicon=16; dsut="Using A Shitty emu, get lost!!";}
-		else{duicon=10; dsut="?";}
+    		if (stage.prefs.mup_awards == true)
+            {
+                muicon=15; 
+                nmut="No Missed Uproar";
+            }
 
-		if(stage.prefs.udemo_awards ==true){udicon=17; udmt="Unlocked Mind Games Demo"; Menu_DrawHealth(5, 144, 8, true);}
-		else{udicon=10; udmt="?";}
-		
-		if(stage.prefs.bdweek_awards ==true){bdwicon=12; bdwt="Beaten Mind Games Demo Week";}
-		else{bdwicon=10; bdwt="?";}
+    		else
+            {
+                muicon=10; 
+                nmut="?";
+            }
 
-		if(stage.prefs.flopg_awards ==true){fgicon=18; fgt="No Missed Full & Demo Week On Hard";Menu_DrawHealth(5, 181, 8, true);}
-	 	else{fgicon=10; fgt="?";}
+    		if (stage.prefs.dsu_awards == true)
+            {
+                duicon=16; 
+                dsut="Using A Shitty emu, get lost!!";
+            }
+    		else
+            {
+                duicon=10; dsut="?";
+            }
+
+    		if (stage.prefs.udemo_awards == true)
+            {
+                udicon=17; udmt="Unlocked Mind Games Demo"; 
+
+                if (!stage.prefs.no_memory_card)
+                {
+                    Menu_DrawHealth(5, 144, 8, true);
+                }
+            }
+    		else
+            {
+                udicon=10; 
+                udmt="?";
+            }
+    		
+    		if (stage.prefs.bdweek_awards == true)
+            {
+                bdwicon=12; 
+                bdwt="Beaten Mind Games Demo Week";
+            }
+
+    		else 
+            {
+                bdwicon=10; 
+                bdwt="?";
+            }
+
+    		if (stage.prefs.flopg_awards == true)
+            {
+                fgicon=18; 
+                fgt="No Missed Full & Demo Week On Hard";
+
+                if (!stage.prefs.no_memory_card)
+                {
+                    Menu_DrawHealth(5, 181, 8, true);
+                }
+            }
+    	 	else
+            {
+                fgicon=10; 
+                fgt="?";
+            }
+    	 	
+    	 	if (stage.prefs.debugger_awards == true)
+            {
+                dbicon=19; 
+                debugt="Compiling the port";
+            }
+
+    	 	else
+            {
+                dbicon=10; 
+                debugt="?";
+            }
 	 	
-	 	if(stage.prefs.debugger_awards ==true){dbicon=19; debugt="Compiling the port";}
-	 	else{dbicon=10; debugt="?";}
-	 	
-	 	if(stage.prefs.lowquality ==1)
-	 	{
-	 		stage.prefs.dsu_awards = true;
-	 	}
-	 	if(stage.nomissfw == true && stage.nomissdw == true)
-	 	{
-	 		stage.prefs.flopg_awards =true;
-	 	}
+    	 	if (stage.prefs.lowquality == 1)
+    	 	{
+    	 		stage.prefs.dsu_awards = true;
+    	 	}
+    	 	if (stage.nomissfw == true && stage.nomissdw == true)
+    	 	{
+    	 		stage.prefs.flopg_awards =true;
+    	 	}
             
             //Draw mind games port version identification
             menu.font_arial.draw(&menu.font_arial,
@@ -1121,8 +1219,8 @@ void Menu_Tick(void)
                             menu.next_select = 0;
                             break;
                         case 5: //save game
-                		Menu_DrawSavingicon( 284, 204);
-                		WriteSaveDataStructToBinaryAndSaveItOnTheFuckingMemoryCard();
+                    		Menu_DrawSavingicon( 284, 204);
+                    		WriteSaveDataStructToBinaryAndSaveItOnTheFuckingMemoryCard();
                 	    break;
                     #ifdef PSXF_NETWORK
                         case 6: //Join Server
@@ -1135,8 +1233,8 @@ void Menu_Tick(void)
                     }
                     if (menu.select !=5)
                     {
-                    menu.next_select = 0;
-                    menu.trans_time = FIXED_UNIT;
+                        menu.next_select = 0;
+                        menu.trans_time = FIXED_UNIT;
                     }
                 }
                 

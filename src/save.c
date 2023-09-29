@@ -92,6 +92,21 @@ boolean readSaveFile()
 	return true;
 }
 
+boolean MemoryCardExists(void)
+{
+	int fd = open(savetitle, 0x0002);
+
+	if (fd < 0) // if save doesnt exist make one
+		fd =  open(savetitle, 0x0202 | (1 << 16));
+
+	if (fd < 0)
+	{
+		return false;
+	}
+
+	return true;
+}
+
 void WriteSaveDataStructToBinaryAndSaveItOnTheFuckingMemoryCard()
 {	
 	int fd = open(savetitle, 0x0002);
