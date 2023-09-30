@@ -94,17 +94,8 @@ boolean readSaveFile()
 
 boolean MemoryCardExists(void)
 {
-	int fd = open(savetitle, 0x0002);
-
-	if (fd < 0) // if save doesnt exist make one
-		fd =  open(savetitle, 0x0202 | (1 << 16));
-
-	if (fd < 0)
-	{
-		return false;
-	}
-
-	return true;
+	// If memory card status dont return 0x11 this means the memory card probably exists
+	return _card_status(0) != 0x11;
 }
 
 void WriteSaveDataStructToBinaryAndSaveItOnTheFuckingMemoryCard()
