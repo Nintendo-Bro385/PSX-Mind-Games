@@ -178,6 +178,10 @@ void Char_Psychic_Tick(Character *character)
 					if (stage.song_step > 185 && stage.song_step <= 186)
 						character->set_anim(character, CharAnim_UpAlt);
 					break;
+				case StageId_1_3: //Tutorial peace
+					if (stage.song_step >=1493)
+						character->set_anim(character, CharAnim_Up);
+					break;
 			}
 		}
 	}

@@ -169,11 +169,13 @@ typedef struct
 	struct
 	{
 		//Stage settings
-		boolean ghost, downscroll, botplay, lowquality, secretunlocked, secretunlocked2, expsync;
+		boolean ghost, downscroll, botplay, lowquality, missanim, secretunlocked, secretunlocked2, expsync;
 		int menumusic;
 		//int psymisses, wiltmisses, uproarmisses;
 		boolean bweek_awards, mpsy_awards, mwilt_awards, mup_awards, dsu_awards, udemo_awards, bdweek_awards, flopg_awards, debugger_awards, nomissfw, nomissdw, no_memory_card;
 	}prefs;
+	
+	boolean loadsaveonce;
 	
 	s32 mode;
 	
@@ -252,7 +254,9 @@ typedef struct
 	PlayerState player_state[2];
 	s32 max_score;
 	
-	u8 misses;
+	u16 misses;
+	
+	boolean loadp1flag;
 	
 	int psymisses, wiltmisses, uproarmisses, psyomisses, latedrivemisses;
 	

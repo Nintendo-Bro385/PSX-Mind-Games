@@ -93,7 +93,7 @@ iso/bfspirit/main.arc: iso/bfspirit/idle0.tim iso/bfspirit/idle1.tim iso/bfspiri
 iso/bfspirit/dead.arc: iso/bfspirit/dead1.tim iso/bfspirit/dead2.tim iso/bfspirit/retry.tim
 
 # Titlepsy
-iso/titlepsy/main.arc: iso/titlepsy/idle0.tim iso/titlepsy/idle1.tim iso/titlepsy/idle2.tim iso/titlepsy/idle3.tim iso/titlepsy/idle4.tim iso/titlepsy/idle5.tim
+iso/titlepsy/main.arc: iso/titlepsy/idle0.tim iso/titlepsy/idle1.tim iso/titlepsy/idle2.tim iso/titlepsy/idle3.tim iso/titlepsy/idle4.tim iso/titlepsy/idle5.tim 
 
 # Title gf
 iso/titlegf/main.arc: iso/titlegf/gf.tim iso/titlegf/gfb.tim iso/titlegf/gfc.tim iso/titlegf/gfg.tim iso/titlegf/gfp.tim iso/titlegf/gfy.tim

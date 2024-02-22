@@ -131,12 +131,7 @@ boolean nohud;
 #include "stage/old.h"
 #include "stage/spacec.h"
 
-static void Menu_DrawSavingicon(s32 x, s32 y)
-{
-    //Draw Track
-    RECT save_src = {192, 224, 32, 32};
-    Gfx_BlitTex(&stage.tex_saving, &save_src, x, y);
-}
+
 static const StageDef stage_defs[StageId_Max] = {
     #include "stagedef_disc1.h"
 };
@@ -476,10 +471,14 @@ static void Stage_NoteCheck(PlayerState *this, u8 type)
             return;
         }
     }
+    if(stage.prefs.missanim)
+    {
     if (this->character->spec & CHAR_SPEC_MISSANIM)
             this->character->set_anim(this->character, note_anims[type & 0x3][2]);
         else
             this->character->set_anim(this->character, note_anims[type & 0x3][0]);
+    }
+    
     
     //Missed a note
     this->arrow_hitan[type & 0x3] = -1;
@@ -759,17 +758,29 @@ static void Stage_DrawHealth(s16 health, u8 i, s8 ox)
         32,
         32
     };
+    if (stage.prefs.downscroll)
+    {
+    RECT_FIXED dst = {
+        hx + ox * FIXED_DEC(15,1) - FIXED_DEC(16,1),
+        FIXED_DEC(SCREEN_HEIGHT2 - 230, 1),
+        src.w << FIXED_SHIFT,
+        src.h << FIXED_SHIFT
+    };
+    //Draw health icon
+    Stage_DrawTex(&stage.tex_hud1, &src, &dst, FIXED_MUL(stage.bump, stage.sbump));
+    }
+    else
+    {
     RECT_FIXED dst = {
         hx + ox * FIXED_DEC(15,1) - FIXED_DEC(16,1),
         FIXED_DEC(SCREEN_HEIGHT2 - 35 + 4 - 16, 1),
         src.w << FIXED_SHIFT,
         src.h << FIXED_SHIFT
     };
-    if (stage.prefs.downscroll)
-        dst.y = -dst.y - dst.h;
-    
     //Draw health icon
     Stage_DrawTex(&stage.tex_hud1, &src, &dst, FIXED_MUL(stage.bump, stage.sbump));
+    }
+    
 }
 static void Stage_DrawStrum(u8 i, RECT *note_src, RECT_FIXED *note_dst)
 {
@@ -873,8 +884,8 @@ static void Stage_DrawNotes(void)
                     this->health -= 475;
                     stage.misses++;
                     this->refresh_misses = true;
-                    //this->character->spec & CHAR_SPEC_MISSANIM;
-                    
+
+
                     //Send miss packet
                     #ifdef PSXF_NETWORK
                         if (stage.mode >= StageMode_Net1)
@@ -1400,6 +1411,7 @@ static void Stage_LoadState(void)
 	if (stage.stage_id == StageId_2_1){pausestage = "PSYCHIC";}
 	if (stage.stage_id == StageId_2_2){pausestage = "LATE DRIVE";}
 	if (stage.stage_id == StageId_2_3){pausestage = "FLOPCHIC";}
+	if (stage.stage_id == StageId_2_4){pausestage = "CLUCKED";}
 	
     loadonce =false;
     //FontData_Load(&stage.font_cdr, Font_CDR);
@@ -1846,6 +1858,29 @@ static void Menu_DrawBot(s32 x, s32 y)
     RECT bot_src = {189, 240, 67, 16};
     Gfx_BlitTex(&stage.tex_hud0, &bot_src, x, y);
 }
+static void Stage_DrawSavingIcon(u8 i, s16 x, s16 y)
+{
+    //save Size
+    u8 save_size = 32;
+
+    //Get src and dst
+    RECT save_src = {
+        (i % 4) * save_size,
+        (i / 4) * save_size,
+        save_size,
+        save_size
+    };
+    RECT save_dst = {
+        x,
+        y,
+        32,
+        32
+    };
+    //save_dst.w = save_dst.w * 2;
+    //save_dst.h = save_dst.h * 2;
+    //Draw dia save
+    Gfx_DrawTex(&stage.tex_hud1, &save_src, &save_dst);
+}
 //Stage functions
 void Stage_Load(StageId id, StageDiff difficulty, boolean story)
 {
@@ -2140,6 +2175,30 @@ void Stage_Tick(void)
         	FontData_Load(&stage.font_bold, Font_Bold);
         	FontData_Load(&stage.font_cdr, Font_CDR);
         	loadonce =true;
+        	switch(stage.stage_diff)
+			    {
+			    	case StageDiff_Easy:
+			    	{
+			    		stage.stage_diff = StageDiff_Easy;
+			    		anotherfuckingvarible = "EASY";
+			    		pausediff2=0;
+			    		break;
+			    	}
+			    	case StageDiff_Normal:
+			    	{
+			    		stage.stage_diff = StageDiff_Normal;
+			    		anotherfuckingvarible = "NORMAL";
+			    		pausediff2=1;
+			    		break;
+			    	}
+			    	case StageDiff_Hard:
+			    	{
+			    		stage.stage_diff = StageDiff_Hard;
+			    		anotherfuckingvarible = "HARD";
+			    		pausediff2=2;
+			    		break;
+			    	}
+			    }
         	}
         	if(paused == false)
         	{
@@ -2213,7 +2272,7 @@ void Stage_Tick(void)
 			    switch (stage.pause_select)
 			    {
 			      case 0: //Resume
-			        if (pad_state.press & PAD_CROSS && paused ==true)
+			        if (pad_state.press & PAD_CROSS)
 			  	{
 					paused = false;
 					Audio_ResumeXA();
@@ -2291,7 +2350,7 @@ void Stage_Tick(void)
             fixed_t next_scroll;
             
             Stage_Note_Move();
-	    if (stage.prefs.botplay)
+	    if (stage.prefs.botplay && stage.stage_id != StageId_1_5 && stage.stage_id != StageId_1_6)
 	    {
     			Menu_DrawBot(126, 49);
 	    }
@@ -2448,6 +2507,19 @@ void Stage_Tick(void)
                     case 511:
                         stage.notemode = 6;
                         break;
+                    case 521:
+                    {
+                    	            note1x = -26;
+				    note2x = -60;
+				    note3x = -94;
+				    note4x = -128;
+
+				    note5x = 26;
+				    note6x = 60;
+				    note7x = 94;
+				    note8x = 128;
+				    break;
+                    }
                     case 575:
                         stage.notemode = 7;
                    	if (stage.prefs.downscroll == 0 && stopdownscroll == 0)
@@ -2465,9 +2537,27 @@ void Stage_Tick(void)
                     	stage.notemode = 8;
                     	stopdownscroll = 0;
                     	break;
+                    case 590:
+                    	{
+                    	note1x = 26;
+            note3x = 94;
+
+            note5x = -128;
+            note7x = -60;
+				note2x = -94;
+				note4x = -26;
+				note6x = 60;
+				note8x = 128;
+			    break;
+                    	}
                     case 700:
                     {
                     	stage.notemode = 9;
+                    	break;
+                    }
+                    case 702:
+                    {
+                    	stage.notemode = 0;
                     	break;
                     }
                     case 703:
@@ -2703,8 +2793,7 @@ void Stage_Tick(void)
                     
                     //Update scroll
                     next_scroll = ((fixed_t)stage.step_base << FIXED_SHIFT) + FIXED_MUL(stage.song_time - stage.time_base, stage.step_crochet);
-                     Gfx_LoadTex(&stage.tex_saving, IO_Read("\\MENU\\SAVING.TIM;1"), GFX_LOADTEX_FREE);
-                    Menu_DrawSavingicon( 284, 204);
+                    Stage_DrawSavingIcon(17, 204, 284);
                     WriteSaveDataStructToBinaryAndSaveItOnTheFuckingMemoryCard();
                     
                     if (stage.prefs.botplay ==0)
@@ -3007,23 +3096,37 @@ void Stage_Tick(void)
 							sprintf(this->score_text, "Score: %d0  |  Misses: %d", this->score * stage.max_score / this->max_score, stage.misses);
 						else
 						{
-							strcpy(this->score_text, "Score: 0  |  Misses: ?");
+							strcpy(this->score_text, "Score: 0  |  Misses: 0");
 						}
 				        }
 				        else
 				        {
-				        	strcpy(this->score_text, "Score: ?  |  Misses: ? | Botplay");
+				        	strcpy(this->score_text, "Score: ?  |  Misses: ?  |  BOTPLAY");
 				        }
 					this->refresh_score = false;
 					this->refresh_misses = false;
 				}
 				if(stage.mode == StageMode_2P)
 				{
+					if (stage.prefs.downscroll)
+					{
+					stage.font_cdr.draw(&stage.font_cdr, this->score_text, (i ^ (stage.mode == StageMode_Swap)) ? 160 - 80 : 160 + 80, 35, FontAlign_Center);
+					}
+					else
+					{
 					stage.font_cdr.draw(&stage.font_cdr, this->score_text, (i ^ (stage.mode == StageMode_Swap)) ? 160 - 80 : 160 + 80, 220, FontAlign_Center);
+					}
 				}
 				else
-				{
+				{	
+					if (stage.prefs.downscroll)
+					{
+					stage.font_cdr.draw(&stage.font_cdr, this->score_text, 160, 35, FontAlign_Center);
+					}
+					else
+					{
 					stage.font_cdr.draw(&stage.font_cdr, this->score_text, 160, 220, FontAlign_Center);
+					}
 				}
 				}
 					
@@ -3044,6 +3147,67 @@ void Stage_Tick(void)
                 //Draw health heads
                 Stage_DrawHealth(stage.player_state[0].health, stage.player->health_i,    1);
                 Stage_DrawHealth(stage.player_state[0].health, stage.opponent->health_i, -1);
+                if(stage.mode == StageMode_Swap)
+                {
+                if (stage.stage_id == StageId_1_1)
+                {
+                //Draw health bar
+                RECT health_fill = {0, 8, 256 - (256 * stage.player_state[0].health / 20000), 8};
+                RECT health_back = {0, 0, 256, 8};
+                RECT_FIXED health_dst = {FIXED_DEC(-128,1), (SCREEN_HEIGHT2 - 32) << FIXED_SHIFT, 0, FIXED_DEC(8,1)};
+                if (stage.prefs.downscroll)
+                    health_dst.y = -health_dst.y - health_dst.h;
+                
+                health_dst.w = health_fill.w << FIXED_SHIFT;
+                Stage_DrawTex(&stage.tex_hud1, &health_fill, &health_dst, stage.bump);
+                health_dst.w = health_back.w << FIXED_SHIFT;
+                Stage_DrawTex(&stage.tex_hud1, &health_back, &health_dst, stage.bump);
+                }
+                else if (stage.stage_id == StageId_1_2)
+                {
+                //Draw health bar
+                RECT health_fill = {0, 16, 256 - (256 * stage.player_state[0].health / 20000), 8};
+                RECT health_back = {0, 0, 256, 8};
+                RECT_FIXED health_dst = {FIXED_DEC(-128,1), (SCREEN_HEIGHT2 - 32) << FIXED_SHIFT, 0, FIXED_DEC(8,1)};
+                if (stage.prefs.downscroll)
+                    health_dst.y = -health_dst.y - health_dst.h;
+                
+                health_dst.w = health_fill.w << FIXED_SHIFT;
+                Stage_DrawTex(&stage.tex_hud1, &health_fill, &health_dst, stage.bump);
+                health_dst.w = health_back.w << FIXED_SHIFT;
+                Stage_DrawTex(&stage.tex_hud1, &health_back, &health_dst, stage.bump);
+                }
+                else if (stage.stage_id == StageId_1_3)
+                {
+                //Draw health bar
+                RECT health_fill = {0, 24, 256 - (256 * stage.player_state[0].health / 20000), 8};
+                RECT health_back = {0, 0, 256, 8};
+                RECT_FIXED health_dst = {FIXED_DEC(-128,1), (SCREEN_HEIGHT2 - 32) << FIXED_SHIFT, 0, FIXED_DEC(8,1)};
+                if (stage.prefs.downscroll)
+                    health_dst.y = -health_dst.y - health_dst.h;
+                
+                health_dst.w = health_fill.w << FIXED_SHIFT;
+                Stage_DrawTex(&stage.tex_hud1, &health_fill, &health_dst, stage.bump);
+                health_dst.w = health_back.w << FIXED_SHIFT;
+                Stage_DrawTex(&stage.tex_hud1, &health_back, &health_dst, stage.bump);
+                }
+                else
+                {
+                //Draw health bar
+                RECT health_fill = {0, 40, 256 - (256 * stage.player_state[0].health / 20000), 8};
+                RECT health_back = {0, 32, 256, 8};
+                RECT_FIXED health_dst = {FIXED_DEC(-128,1), (SCREEN_HEIGHT2 - 32) << FIXED_SHIFT, 0, FIXED_DEC(8,1)};
+                if (stage.prefs.downscroll)
+                    health_dst.y = -health_dst.y - health_dst.h;
+                
+                health_dst.w = health_fill.w << FIXED_SHIFT;
+                Stage_DrawTex(&stage.tex_hud1, &health_fill, &health_dst, stage.bump);
+                health_dst.w = health_back.w << FIXED_SHIFT;
+                Stage_DrawTex(&stage.tex_hud1, &health_back, &health_dst, stage.bump);
+                }
+                }
+                else
+                {
                 if (stage.stage_id == StageId_1_1)
                 {
                 //Draw health bar
@@ -3099,6 +3263,7 @@ void Stage_Tick(void)
                 Stage_DrawTex(&stage.tex_hud1, &health_fill, &health_dst, stage.bump);
                 health_dst.w = health_back.w << FIXED_SHIFT;
                 Stage_DrawTex(&stage.tex_hud1, &health_back, &health_dst, stage.bump);
+                }
                 }
             }
             

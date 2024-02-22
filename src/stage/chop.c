@@ -552,7 +552,7 @@ void Back_Chop_DrawBG(StageBack *back)
 		}
 	}
 
-	/*if (stage.stage_id == StageId_1_5)
+	if (stage.stage_id == StageId_1_5)
 	{
 		switch (stage.song_step)
 		{
@@ -571,7 +571,7 @@ void Back_Chop_DrawBG(StageBack *back)
 				break;
 			}
 		}
-	}*/
+	}
 
 
 }

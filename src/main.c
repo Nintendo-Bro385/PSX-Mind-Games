@@ -124,15 +124,6 @@ int main(int argc, char **argv)
 void UnlockEverything(void)
 {
 	stage.prefs.secretunlocked = true;
-	stage.prefs.secretunlocked2 = true;
 	stage.prefs.udemo_awards = true;
-	stage.prefs.bweek_awards = true;
-	stage.prefs.mpsy_awards = true;
-	stage.prefs.mwilt_awards = true;
-	stage.prefs.mup_awards = true;
-	stage.prefs.dsu_awards = true;
-	stage.prefs.bdweek_awards = true;
-	stage.prefs.flopg_awards = true;
-	stage.prefs.debugger_awards = true;
 	stage.prefs.no_memory_card = true;
 }

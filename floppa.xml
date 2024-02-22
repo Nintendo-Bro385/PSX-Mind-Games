@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!-- Defines the ISO project -->
-<iso_project image_name="funkin.bin" cue_sheet="funkin.cue" no_xa="0">
+<iso_project image_name="PSXMindGames.bin" cue_sheet="PSXMindGames.cue" no_xa="0">
 	<!-- Data track -->
 	<track type="data">
 		<!-- Identifiers -->
@@ -94,6 +94,8 @@
 				<file name = "2.3n.cht" type = "data" source = "iso/chart/psychic.json.cht"/>
 				<file name = "2.3h.cht" type = "data" source = "iso/chart/psychic-hard.json.cht"/>
 				<!-- Clucked charts -->
+				<file name = "2.4e.cht" type = "data" source = "iso/chart/clucked-easy.json.cht"/>
+				<file name = "2.4n.cht" type = "data" source = "iso/chart/clucked.json.cht"/>
 				<file name = "2.4h.cht" type = "data" source = "iso/chart/clucked-hard.json.cht"/>
 			</dir>
 			

@@ -305,7 +305,7 @@ static void Menu_DrawBack(boolean flash, s32 scroll, u8 r0, u8 g0, u8 b0, u8 r1,
 	}
 }
 
-/*static void Menu_DifficultySelectorFreeplay(s32 x, s32 y)
+static void Menu_DifficultySelector(s32 x, s32 y)
 {
     //Change difficulty
     if (menu.next_page == menu.page && Trans_Idle())
@@ -325,73 +325,25 @@ static void Menu_DrawBack(boolean flash, s32 scroll, u8 r0, u8 g0, u8 b0, u8 r1,
                 menu.page_param.stage.diff = StageDiff_Easy;
         }
     }
-    if(menu.page_param.stage.diff == StageDiff_Easy)
-    {
-    menu.font_arial.draw(&menu.font_arial,
-                "< EASY >",
-                8,
-                10,
-                FontAlign_Left
-            );
-    }
-    else if(menu.page_param.stage.diff == StageDiff_Normal)
-    {
-    menu.font_arial.draw(&menu.font_arial,
-                "< NORMAL >",
-                8,
-                10,
-                FontAlign_Left
-            );
-    }
-    else if(menu.page_param.stage.diff == StageDiff_Hard)
-    {
-    menu.font_arial.draw(&menu.font_arial,
-                "< HARD >",
-                8,
-                10,
-                FontAlign_Left
-            );
-    }
-}*/
-static void Menu_DifficultySelector(s32 x, s32 y)
-{
-	//Change difficulty
-	if (menu.next_page == menu.page && Trans_Idle())
-	{
-		if (pad_state.press & PAD_LEFT)
-		{
-			if (menu.page_param.stage.diff > StageDiff_Easy)
-				menu.page_param.stage.diff--;
-			else
-				menu.page_param.stage.diff = StageDiff_Hard;
-		}
-		if (pad_state.press & PAD_RIGHT)
-		{
-			if (menu.page_param.stage.diff < StageDiff_Hard)
-				menu.page_param.stage.diff++;
-			else
-				menu.page_param.stage.diff = StageDiff_Easy;
-		}
-	}
-	
-	//Draw difficulty arrows
-	static const RECT arrow_src[2][2] = {
-		{{224, 64, 16, 32}, {224, 96, 16, 32}}, //left
-		{{240, 64, 16, 32}, {240, 96, 16, 32}}, //right
-	};
-	
-	Gfx_BlitTex(&menu.tex_story, &arrow_src[0][(pad_state.held & PAD_LEFT) != 0], x - 40 - 16, y - 16);
-	Gfx_BlitTex(&menu.tex_story, &arrow_src[1][(pad_state.held & PAD_RIGHT) != 0], x + 40, y - 16);
-	
-	//Draw difficulty
-	static const RECT diff_srcs[] = {
-		{  0, 96, 64, 18},
-		{ 64, 96, 80, 18},
-		{144, 96, 64, 18},
-	};
-	
-	const RECT *diff_src = &diff_srcs[menu.page_param.stage.diff];
-	Gfx_BlitTex(&menu.tex_story, diff_src, x - (diff_src->w >> 1), y - 9 + ((pad_state.press & (PAD_LEFT | PAD_RIGHT)) != 0));
+    
+    //Draw difficulty arrows
+    static const RECT arrow_src[2][2] = {
+        {{224, 64, 16, 32}, {224, 96, 16, 32}}, //left
+        {{240, 64, 16, 32}, {240, 96, 16, 32}}, //right
+    };
+    
+    Gfx_BlitTex(&menu.tex_story, &arrow_src[0][(pad_state.held & PAD_LEFT) != 0], x - 40 - 16, y - 16);
+    Gfx_BlitTex(&menu.tex_story, &arrow_src[1][(pad_state.held & PAD_RIGHT) != 0], x + 40, y - 16);
+    
+    //Draw difficulty
+    static const RECT diff_srcs[] = {
+        {  0, 96, 64, 18},
+        { 64, 96, 80, 18},
+        {144, 96, 64, 18},
+    };
+    
+    const RECT *diff_src = &diff_srcs[menu.page_param.stage.diff];
+    Gfx_BlitTex(&menu.tex_story, diff_src, x - (diff_src->w >> 1), y - 9 + ((pad_state.press & (PAD_LEFT | PAD_RIGHT)) != 0));
 }
 static void Menu_DrawWeek(const char *week, s32 x, s32 y)
 {
@@ -737,7 +689,7 @@ void Menu_Tick(void)
                 menu.next_page = MenuPage_Main;
                 menu.next_select = 0;
             }
-            if ((pad_state.press & PAD_R1) && stage.prefs.udemo_awards ==false && stage.prefs.bweek_awards ==true)
+            /*if ((pad_state.press & PAD_R1) && stage.prefs.udemo_awards ==false && stage.prefs.bweek_awards ==true)
             {
             	Audio_StopXA();
 		Audio_PlayXA_Track(XA_Freeky, 0x40, 2, 1);
@@ -748,7 +700,7 @@ void Menu_Tick(void)
             	menu.page_state.title.fade = FIXED_DEC(255,1);
                 menu.page_state.title.fadespd = FIXED_DEC(300,1);
                 Menu_Load(MenuPage_Opening);
-            }
+            }*/
             
             //Draw Friday Night Funkin' logo
             if ((stage.flag & STAGE_FLAG_JUST_STEP) && (stage.song_step & 0x3) == 0 && menu.page_state.title.logo_bump == 0)
@@ -1075,6 +1027,7 @@ void Menu_Tick(void)
             	locklate = "LATE DRIVE";
             	iconlock = 2;
             	storylock = "1";
+            	stage.prefs.secretunlocked =false;
             }
             else
             {
@@ -1088,6 +1041,7 @@ void Menu_Tick(void)
             	lockflop = "FLOPCHIC";
             	iconlock2 = 3;
             	stage.prefs.flopg_awards =true;
+            	stage.prefs.secretunlocked2 =false;
             }
             else
             {
@@ -1317,12 +1271,12 @@ void Menu_Tick(void)
                     menu.next_page = MenuPage_Title;
                     Trans_Start();
                 }
-                if (pad_state.press & PAD_TRIANGLE)
+                /*if (pad_state.press & PAD_TRIANGLE)
                 {
                     menu.next_page = MenuPage_Debug;
                     menu.next_select = 0;
                     Trans_Start();
-                }
+                }*/
             }
             
             //Draw options
@@ -1447,7 +1401,7 @@ void Menu_Tick(void)
                 {
                 	//Draw upper strip
                     	RECT name_bar = {0, 24, SCREEN_WIDTH, 136};
-                    	Gfx_DrawRect(&name_bar, 247, 214, 82);
+                    	Gfx_DrawRect(&name_bar, 249, 207, 81);
                     	//Draw upper strip
                     	RECT top_bar = {0, 0, SCREEN_WIDTH, 24};
                     	Gfx_DrawRect(&top_bar, 0, 0, 0);
@@ -2576,13 +2530,6 @@ void Menu_Tick(void)
                 }
                 case 17:
                 {
-                    if (pad_state.press & (PAD_START | PAD_CROSS))
-                	{
-                	    menu.next_page = MenuPage_Stage;
-		            menu.page_param.stage.id = StageId_2_4;
-		            menu.page_param.stage.story = false;
-		            Trans_Start();
-		        }
                     //Draw text
                     menu.font_arial.draw(&menu.font_arial,
                         "CKDEV",
