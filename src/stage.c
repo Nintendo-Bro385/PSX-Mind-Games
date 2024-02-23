@@ -35,6 +35,7 @@ const char *pausediff = "EASY";
 const char *anotherfuckingvarible = "EASY";
 const char *pausestage = "PSYCHIC";
 int pausediff2;
+int diabox;
 
 boolean normo;
 boolean paused;
@@ -3449,9 +3450,12 @@ void Stage_Tick(void)
         case StageState_Dialogue:
         {
             //oh boy
-
-            RECT dia_src = {0, 0, 227, 63};
+            RECT dia_src = {0, 0, 255, 77};
             RECT_FIXED dia_dst = {FIXED_DEC(-150,1), FIXED_DEC(30,1), FIXED_DEC(297,1), FIXED_DEC(76,1)};
+
+            RECT dia2_src = {0, 112, 240, 63};
+            RECT_FIXED dia2_dst = {FIXED_DEC(-150,1), FIXED_DEC(30,1), FIXED_DEC(297,1), FIXED_DEC(76,1)};
+            
 
             //???
             Stage *this = (Stage*)this;
@@ -3461,17 +3465,18 @@ void Stage_Tick(void)
                 const char *text; //The text that is displayed
                 u8 camera; //Who the camera is pointing at, 0 for bf, 1 for dad
                 int port1;//opponent
-                int port2;//player
+                int port2;//player#
+                int diaboxes;
             }psydia[] = {
-                {"What brings you here so late at night?",1, 0, 15},
-                {"Beep.",0, 15, 6},
-                {"Drop the act already.",1, 3, 15},
-                {"I could feel your malicious intent the\nmoment you set foot in here.",1, 0, 15},
-                {"Bep bee aa skoo dep?",0, 15, 12},
-                {"I wouldn't try the door if I were you.",1, 4, 15},
-                {"Now...",1, 2, 15},
-                {"I have a couple of questions to ask you...",1, 0, 15},
-                {"And you WILL answer them.",1, 3, 15},
+                {"What brings you here so late at night?",1, 0, 15, 0},
+                {"Beep.",0, 15, 6, 0},
+                {"Drop the act already.",1, 3, 15, 1},
+                {"I could feel your malicious intent the\nmoment you set foot in here.",1, 0, 15, 0},
+                {"Bep bee aa skoo dep?",0, 15, 12, 0},
+                {"I wouldn't try the door if I were you.",1, 4, 15, 0},
+                {"Now...",1, 2, 15, 0},
+                {"I have a couple of questions to ask you...",1, 0, 15, 0},
+                {"And you WILL answer them.",1, 3, 15, 0},
             };
             
 
@@ -3481,23 +3486,24 @@ void Stage_Tick(void)
                 u8 camera;
                 int port1;
                 int port2;
+                int diaboxes;
             }wiltdia[] = {
-                {"Welp, you got me!",0, 15, 7},
-                {"You're very clever, I'll give you that much.",0, 15, 7},
-                {"No ordinary person would have seen\nthrough my facade.",0, 15, 7},
-                {"Yeah, um...",1, 5, 15},
-                {"...Who are you again?",1, 4, 15},
-                {"Kh...!",0, 15, 8},
-                {"You don't even remember me?!",0, 15, 8},
-                {"Not in the slightest.",1, 2, 15},
-                {"Seriously?! W-Whatever!",0, 15, 9},
-                {"Now listen here!",0, 15, 9},
-                {"I've taken this body hostage, so\ndon't even try anything!",0, 15, 9},
-                {"Summon Daddy Dearest here this instant,\nor else he gets it!",0, 15, 9},
-                {"...Daddy Dearest, huh..?",1, 2, 15},
-                {"I don't know what your deal is, but...",1, 5, 15},
-                {"I don't take commands from freaks of\nnature like you.",1, 3, 15},
-                {"What did you just call me?!",0, 15, 10},
+                {"Welp, you got me!",0, 15, 7, 0},
+                {"You're very clever, I'll give you that much.",0, 15, 7, 0},
+                {"No ordinary person would have seen\nthrough my facade.",0, 15, 7, 0},
+                {"Yeah, um...",1, 5, 15, 0},
+                {"...Who are you again?",1, 4, 15, 0},
+                {"Kh...!",0, 15, 8, 0},
+                {"You don't even remember me?!",0, 15, 8, 0},
+                {"Not in the slightest.",1, 2, 15, 0},
+                {"Seriously?! W-Whatever!",0, 15, 9, 1},
+                {"Now listen here!",0, 15, 9, 0},
+                {"I've taken this body hostage, so\ndon't even try anything!",0, 15, 9, 0},
+                {"Summon Daddy Dearest here this instant,\nor else he gets it!",0, 15, 9, 0},
+                {"...Daddy Dearest, huh..?",1, 2, 15, 0},
+                {"I don't know what your deal is, but...",1, 5, 15, 0},
+                {"I don't take commands from freaks of\nnature like you.",1, 3, 15, 0},
+                {"What did you just call me?!",0, 15, 10, 1},
             };
 
             static const struct
@@ -3538,15 +3544,16 @@ void Stage_Tick(void)
                 u8 camera; //Who the camera is pointing at, 0 for bf, 1 for dad
                 int port1;
                 int port2;
+                int diaboxes;
             }flopdia[] = {
-                {"Meow!",1, 13, 15},
-                {"Beep.",0, 15, 6},
-                {"HISSS",1, 14, 15},
-                {"Bep bee aa skoo dep?",0, 15, 12},
-                {"Meow Meow",1, 13, 15},
-                {"Hiss",1, 14, 15},
-                {"Beep bop!",0, 15, 6},
-                {"HISSSS!!",1, 14, 15},
+                {"Meow!",1, 13, 15, 0},
+                {"Beep.",0, 15, 6, 0},
+                {"HISSS",1, 14, 15, 1},
+                {"Bep bee aa skoo dep?",0, 15, 12, 0},
+                {"Meow Meow",1, 13, 15, 0},
+                {"Hiss",1, 14, 15, 1},
+                {"Beep bop!",0, 15, 6, 0},
+                {"HISSSS!!",1, 14, 15, 1},
             };
 
             //Clear per-frame flags
@@ -3564,11 +3571,11 @@ void Stage_Tick(void)
                 case StageId_1_1:
                 {
                     //Animatable_Animate(&this->psytalk_animatable, (void*)this, PsyTalk_SetFrame);
-
+		    
                     stage.font_arial.draw_col(&stage.font_arial,
                         psydia[stage.delect].text,
-                        25,
-                        170,
+                        50,
+                        180,
                         FontAlign_Left,
                         0 >> 1,
                         0 >> 1,
@@ -3576,6 +3583,15 @@ void Stage_Tick(void)
                     );
                     Stage_DrawDiaPorts(psydia[stage.delect].port1, 70, 97);
                     Stage_DrawDiaPorts(psydia[stage.delect].port2, 180, 94);
+                    
+                    if(psydia[stage.delect].diaboxes==0)
+                    {
+                    diabox=0;
+                    }
+                    else
+                    {
+                    diabox=1;
+                    }
                     if (stage.delect == 9)
                     {
                         Audio_StopXA();
@@ -3596,8 +3612,8 @@ void Stage_Tick(void)
                 {
                     stage.font_arial.draw_col(&stage.font_arial,
                         wiltdia[stage.delect].text,
-                        25,
-                        170,
+                        50,
+                        180,
                         FontAlign_Left,
                         0 >> 1,
                         0 >> 1,
@@ -3605,6 +3621,14 @@ void Stage_Tick(void)
                     );
 		    Stage_DrawDiaPorts(wiltdia[stage.delect].port1, 70, 97);
                     Stage_DrawDiaPorts(wiltdia[stage.delect].port2, 180, 94);
+                    if(wiltdia[stage.delect].diaboxes==0)
+                    {
+                    diabox=0;
+                    }
+                    else
+                    {
+                    diabox=1;
+                    }
                     if (stage.delect == 16)
                     {
                         Audio_StopXA();
@@ -3623,8 +3647,8 @@ void Stage_Tick(void)
                 {
                     stage.font_arial.draw_col(&stage.font_arial,
                         uproardia[stage.delect].text,
-                        25,
-                        170,
+                        50,
+                        180,
                         FontAlign_Left,
                         0 >> 1,
                         0 >> 1,
@@ -3632,6 +3656,9 @@ void Stage_Tick(void)
                     );
                     Stage_DrawDiaPorts(uproardia[stage.delect].port1, 70, 97);
                     Stage_DrawDiaPorts(uproardia[stage.delect].port2, 180, 94);
+                    
+                    diabox=0;
+                    
                     if (stage.delect == 9)
                     {
                         Audio_StopXA();
@@ -3649,14 +3676,14 @@ void Stage_Tick(void)
                 {//sus
                     stage.font_arial.draw_col(&stage.font_arial,
                         latedrivedia[stage.delect].text,
-                        25,
-                        170,
+                        50,
+                        180,
                         FontAlign_Left,
                         0 >> 1,
                         0 >> 1,
                         0 >> 1
                     );
-
+	            diabox=0;
                     if (stage.delect == 7)
                     {
                         Audio_StopXA();
@@ -3676,8 +3703,8 @@ void Stage_Tick(void)
 
                     stage.font_arial.draw_col(&stage.font_arial,
                         flopdia[stage.delect].text,
-                        25,
-                        170,
+                        50,
+                        180,
                         FontAlign_Left,
                         0 >> 1,
                         0 >> 1,
@@ -3685,6 +3712,14 @@ void Stage_Tick(void)
                     );
                     Stage_DrawDiaPorts(flopdia[stage.delect].port1, 70, 105);
                     Stage_DrawDiaPorts(flopdia[stage.delect].port2, 180, 94);
+                    if(flopdia[stage.delect].diaboxes==0)
+                    {
+                    diabox=0;
+                    }
+                    else
+                    {
+                    diabox=1;
+                    }
                     if (stage.delect == 8)
                     {
                         Audio_StopXA();
@@ -3704,8 +3739,15 @@ void Stage_Tick(void)
                 default:
                     break;
             }
-
+	    if(diabox==0)
+	    {
             Stage_DrawTex(&stage.tex_dia, &dia_src, &dia_dst, stage.bump);
+            }
+            else
+            {
+            Stage_DrawTex(&stage.tex_dia, &dia2_src, &dia2_dst, stage.bump);
+            }
+            
             
             static const RECT walterwhite = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
 
