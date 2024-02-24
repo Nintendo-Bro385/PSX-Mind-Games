@@ -311,8 +311,8 @@ static u8 Stage_HitNote(PlayerState *this, u8 type, fixed_t offset)
     static const s32 score_inc[] = {
         35, //SICK
         20, //GOOD
-        10, //BAD
-         5, //SHIT
+        -5, //BAD
+         -10, //SHIT
     };
     this->score += score_inc[hit_type];
     this->refresh_score = true;
@@ -332,23 +332,24 @@ static u8 Stage_HitNote(PlayerState *this, u8 type, fixed_t offset)
         ObjectList_Add(&stage.objlist_fg, (Object*)combo);
     
     //Create note splashes if SICK
-    if (hit_type == 0)
-    {
-        for (int i = 0; i < 3; i++)
-        {
-            //Create splash object
-            Obj_Splash *splash = Obj_Splash_New(
-                
-                note_x[type ^ stage.note_swap],
-                note_y[type ^ stage.note_swap] * (stage.prefs.downscroll ? -1 : 1),
-                type & 0x3
-            );
-            if (splash != NULL)
-                ObjectList_Add(&stage.objlist_splash, (Object*)splash);
-        }
-    }
-    
-    return hit_type;
+    	if (hit_type == 0)
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			//Create splash object
+			Obj_Splash *splash = Obj_Splash_New(
+				
+				note_x[type ^ stage.note_swap],
+				note_y[type ^ stage.note_swap] * (stage.prefs.downscroll ? -1 : 1),
+				type & 0x3
+			);
+			if (splash != NULL)
+				ObjectList_Add(&stage.objlist_splash, (Object*)splash);
+		}
+	}
+	
+	
+	return hit_type;
 }
 
 static void Stage_MissNote(PlayerState *this)
@@ -821,7 +822,7 @@ static void Stage_DrawStrum(u8 i, RECT *note_src, RECT_FIXED *note_dst)
     }
 }
 
-static void Stage_DrawNotes(void)
+/*static void Stage_DrawNotes(void)
 {
     //Check if opponent should draw as bot
     u8 bot = (stage.mode == StageMode_2P) ? 0 : NOTE_FLAG_OPPONENT;
@@ -1124,6 +1125,307 @@ static void Stage_DrawNotes(void)
             }
         }
     }
+}*/
+static void Stage_DrawNotes(void)
+{
+	//Check if opponent should draw as bot
+	u8 bot = (stage.mode == StageMode_2P) ? 0 : NOTE_FLAG_OPPONENT;
+	
+	//Initialize scroll state
+	SectionScroll scroll;
+	scroll.start = stage.time_base;
+	
+	Section *scroll_section = stage.section_base;
+	Stage_GetSectionScroll(&scroll, scroll_section);
+	
+	//Push scroll back until cur_note is properly contained
+	while (scroll.start_step > stage.cur_note->pos)
+	{
+		//Look for previous section
+		Section *prev_section = Stage_GetPrevSection(scroll_section);
+		if (prev_section == NULL)
+			break;
+		
+		//Push scroll back
+		scroll_section = prev_section;
+		Stage_GetSectionScroll(&scroll, scroll_section);
+		scroll.start -= scroll.length;
+	}
+	
+	//Draw notes
+	for (Note *note = stage.cur_note; note->pos != 0xFFFF; note++)
+	{
+		//Update scroll
+		while (note->pos >= scroll_section->end)
+		{
+			//Push scroll forward
+			scroll.start += scroll.length;
+			Stage_GetSectionScroll(&scroll, ++scroll_section);
+		}
+
+		
+		//Get note information
+		u8 i = (note->type & NOTE_FLAG_OPPONENT) != 0;
+		PlayerState *this = &stage.player_state[i];
+		
+		fixed_t note_fp = (fixed_t)note->pos << FIXED_SHIFT;
+		fixed_t time = (scroll.start - stage.song_time) + (scroll.length * (note->pos - scroll.start_step) / scroll.length_step);
+		fixed_t y = note_y[(note->type & 0x7) ^ stage.note_swap] + FIXED_MUL(stage.speed, time * 150);
+		
+		//Check if went above screen
+		if (y < FIXED_DEC(-16 - SCREEN_HEIGHT2, 1))
+		{
+			//Wait for note to exit late time
+			if (note_fp + stage.late_safe >= stage.note_scroll)
+				continue;
+			
+			//Miss note if player's note
+			if (!(note->type & (bot | NOTE_FLAG_HIT | NOTE_FLAG_MINE)))
+			{
+				if (stage.mode < StageMode_Net1 || i == ((stage.mode == StageMode_Net1) ? 0 : 1))
+				{
+					//Missed note
+					Stage_CutVocal();
+					Stage_MissNote(this);
+					this->health -= 475;
+					stage.misses++;
+					stage.player_state[0].refresh_score = true;
+					
+					//Send miss packet
+					#ifdef PSXF_NETWORK
+						if (stage.mode >= StageMode_Net1)
+						{
+							//Send note hit packet
+							Packet note_hit;
+							note_hit[0] = PacketType_NoteMiss;
+							note_hit[1] = 0xFF;
+							
+							note_hit[2] = this->score >> 0;
+							note_hit[3] = this->score >> 8;
+							note_hit[4] = this->score >> 16;
+							note_hit[5] = this->score >> 24;
+							
+							Network_Send(&note_hit);
+						}
+					#endif
+				}
+			}
+			
+			//Update current note
+			stage.cur_note++;
+		}
+		else
+		{
+			//Don't draw if below screen
+			RECT note_src;
+			RECT_FIXED note_dst;
+			if (y > (FIXED_DEC(SCREEN_HEIGHT,2) + scroll.size) || note->pos == 0xFFFF)
+				break;
+			
+			//Draw note
+			if (note->type & NOTE_FLAG_SUSTAIN)
+			{
+				//Check for sustain clipping
+				fixed_t clip;
+				y -= scroll.size;
+				if ((note->type & (bot | NOTE_FLAG_HIT)) || ((this->pad_held & note_key[note->type & 0x3]) && (note_fp + stage.late_sus_safe >= stage.note_scroll)))
+				{
+					clip = FIXED_DEC(32 - SCREEN_HEIGHT2, 1) - y;
+					if (clip < 0)
+						clip = 0;
+				}
+				else
+				{
+					clip = 0;
+				}
+				
+				//Draw sustain
+				if (note->type & NOTE_FLAG_SUSTAIN_END)
+				{
+					if (clip < (24 << FIXED_SHIFT))
+					{
+						note_src.x = 160;
+						note_src.y = ((note->type & 0x3) << 5) + 4 + (clip >> FIXED_SHIFT);
+						note_src.w = 32;
+						note_src.h = 28 - (clip >> FIXED_SHIFT);
+						
+						if (normo == true && note->type & NOTE_FLAG_FLIPX)
+							note_dst.x = note_x[(note->type & 0x7) ^ stage.note_swap] - FIXED_DEC(16,1);
+						else if (note->type & NOTE_FLAG_FLIPX)
+							note_dst.x = note_flip[(note->type & 0x7) ^ stage.note_swap] - FIXED_DEC(16,1);
+						else if (normo == true)
+							note_dst.x = note_norm[(note->type & 0x7) ^ stage.note_swap] - FIXED_DEC(16,1);
+						else
+							note_dst.x = note_x[(note->type & 0x7) ^ stage.note_swap] - FIXED_DEC(16,1);
+					    note_dst.y = y + clip;
+					    note_dst.w = note_src.w << FIXED_SHIFT;
+					    note_dst.h = (note_src.h << FIXED_SHIFT);
+					
+						
+						if (stage.prefs.downscroll)
+						{
+							note_dst.y = -note_dst.y;
+							note_dst.h = -note_dst.h;
+						}
+						Stage_DrawTex(&stage.tex_hud0, &note_src, &note_dst, stage.bump);
+					}
+				}
+				else
+				{
+					//Get note height
+					fixed_t next_time = (scroll.start - stage.song_time) + (scroll.length * (note->pos + 12 - scroll.start_step) / scroll.length_step);
+					fixed_t next_y = note_y[(note->type & 0x7) ^ stage.note_swap] + FIXED_MUL(stage.speed, next_time * 150) - scroll.size;
+					fixed_t next_size = next_y - y;
+					
+					if (clip < next_size)
+					{
+						note_src.x = 160;
+						note_src.y = ((note->type & 0x3) << 5);
+						note_src.w = 32;
+						note_src.h = 16;
+						
+						if (normo == true && note->type & NOTE_FLAG_FLIPX)
+							note_dst.x = note_x[(note->type & 0x7) ^ stage.note_swap] - FIXED_DEC(16,1);
+						else if (note->type & NOTE_FLAG_FLIPX)
+							note_dst.x = note_flip[(note->type & 0x7) ^ stage.note_swap] - FIXED_DEC(16,1);
+						else if (normo == true)
+							note_dst.x = note_norm[(note->type & 0x7) ^ stage.note_swap] - FIXED_DEC(16,1);
+						else
+							note_dst.x = note_x[(note->type & 0x7) ^ stage.note_swap] - FIXED_DEC(16,1);
+						note_dst.y = y + clip;
+						note_dst.w = note_src.w << FIXED_SHIFT;
+						note_dst.h = (next_y - y) - clip;
+						
+						if (stage.prefs.downscroll)
+							note_dst.y = -note_dst.y - note_dst.h;
+						Stage_DrawTex(&stage.tex_hud0, &note_src, &note_dst, stage.bump);
+					}
+				}
+			}
+			else if (note->type & NOTE_FLAG_FLIPX)
+			{
+				//Don't draw if already hit
+				if (note->type & NOTE_FLAG_HIT)
+					continue;
+				
+				//Draw note
+				note_src.x = 32 + ((note->type & 0x3) << 5);
+				note_src.y = 0;
+				note_src.w = 32;
+				note_src.h = 32;
+			
+			    note_dst.x = note_flip[(note->type & 0x7) ^ stage.note_swap] - FIXED_DEC(16,1);
+			    note_dst.y = y - FIXED_DEC(16,1);
+			    note_dst.w = note_src.w << FIXED_SHIFT;
+			    note_dst.h = note_src.h << FIXED_SHIFT;
+			
+				if (stage.prefs.downscroll)
+					note_dst.y = -note_dst.y - note_dst.h;
+				Stage_DrawTex(&stage.tex_hud0, &note_src, &note_dst, stage.bump);
+			}
+			else if (note->type & NOTE_FLAG_NOFLIP)
+			{
+				//Don't draw if already hit
+				if (note->type & NOTE_FLAG_HIT)
+					continue;
+				
+				//Draw note
+				note_src.x = 32 + ((note->type & 0x3) << 5);
+				note_src.y = 0;
+				note_src.w = 32;
+				note_src.h = 32;
+			
+			    note_dst.x = note_norm[(note->type & 0x7) ^ stage.note_swap] - FIXED_DEC(16,1);
+			    note_dst.y = y - FIXED_DEC(16,1);
+			    note_dst.w = note_src.w << FIXED_SHIFT;
+			    note_dst.h = note_src.h << FIXED_SHIFT;
+			
+				if (stage.prefs.downscroll)
+					note_dst.y = -note_dst.y - note_dst.h;
+				Stage_DrawTex(&stage.tex_hud0, &note_src, &note_dst, stage.bump);
+			}
+			else if (note->type & NOTE_FLAG_MINE)
+			{
+				//Don't draw if already hit
+				if (note->type & NOTE_FLAG_HIT)
+					continue;
+				
+				//Draw note body
+				note_src.x = 192 + ((note->type & 0x1) << 5);
+				note_src.y = (note->type & 0x2) << 4;
+				note_src.w = 32;
+				note_src.h = 32;
+				
+				note_dst.x = note_x[(note->type & 0x7) ^ stage.note_swap] - FIXED_DEC(16,1);
+				note_dst.y = y - FIXED_DEC(16,1);
+				note_dst.w = note_src.w << FIXED_SHIFT;
+				note_dst.h = note_src.h << FIXED_SHIFT;
+				
+				if (stage.prefs.downscroll)
+					note_dst.y = -note_dst.y - note_dst.h;
+				Stage_DrawTex(&stage.tex_hud0, &note_src, &note_dst, stage.bump);
+				
+				if (stage.stage_id == StageId_1_4)
+				{
+					//Draw note halo
+					note_src.x = 160;
+					note_src.y = 128 + ((animf_count & 0x3) << 3);
+					note_src.w = 32;
+					note_src.h = 8;
+					
+					note_dst.y -= FIXED_DEC(6,1);
+					note_dst.h >>= 2;
+					
+					Stage_DrawTex(&stage.tex_hud0, &note_src, &note_dst, stage.bump);
+				}
+				else
+				{
+					//Draw note fire
+					note_src.x = 192 + ((animf_count & 0x1) << 5);
+					note_src.y = 64 + ((animf_count & 0x2) * 24);
+					note_src.w = 32;
+					note_src.h = 48;
+					
+					if (stage.prefs.downscroll)
+					{
+						note_dst.y += note_dst.h;
+						note_dst.h = note_dst.h * -3 / 2;
+					}
+					else
+					{
+						note_dst.h = note_dst.h * 3 / 2;
+					}
+					Stage_DrawTex(&stage.tex_hud0, &note_src, &note_dst, stage.bump);
+				}
+			}
+			else
+			{
+				//Don't draw if already hit
+				if (note->type & NOTE_FLAG_HIT)
+					continue;
+				
+				//Draw note
+				note_src.x = 32 + ((note->type & 0x3) << 5);
+				note_src.y = 0;
+				note_src.w = 32;
+				note_src.h = 32;
+			
+			    if (stage.stage_id == StageId_1_2 || normo == 1)
+				{
+					note_dst.x = note_norm[(note->type & 0x7) ^ stage.note_swap] - FIXED_DEC(16,1);
+				}
+				else
+					note_dst.x = note_x[(note->type & 0x7) ^ stage.note_swap] - FIXED_DEC(16,1);
+			    note_dst.y = y - FIXED_DEC(16,1);
+			    note_dst.w = note_src.w << FIXED_SHIFT;
+			    note_dst.h = note_src.h << FIXED_SHIFT;
+			
+				if (stage.prefs.downscroll)
+					note_dst.y = -note_dst.y - note_dst.h;
+				Stage_DrawTex(&stage.tex_hud0, &note_src, &note_dst, stage.bump);
+			}
+		}
+	}
 }
 void Stage_DrawBox()
 {
@@ -2412,47 +2714,47 @@ void Stage_Tick(void)
             }
 
             if (stage.stage_id == StageId_1_3)
-            {
-                switch (stage.song_step)
-                {
-                    case 253:
-                        stage.notemode = 4;
-                        break;
-                    case 362:
-                        normo = true;
-                        break;
-                    case 378:
-                        stage.notemode = 5;
-                        break;
-                    case 416:
-                        normo = false;
-                        break;
-                    case 441:
-                        stage.notemode = 1;
-                        break;
-                    case 509:
-                        stage.notemode = 2;
-                        break;
-                    case 637:
-                        stage.notemode = 4;
-                        break;
-                    case 748:
-                        normo = true;
-                        break;
-                    case 765:
-                        stage.notemode = 5;
-                        break;
-                    case 814:
-                        normo = false;
-                        break;
-                    case 956:
-                        stage.notemode = 3;
-                        break;
-                    case 1019:
-                        stage.notemode = 2;
-                        break;
-                }
-            }
+			{
+				switch (stage.song_step)
+				{
+					case 253:
+					    stage.notemode = 4;
+						break;
+					case 362:
+						normo = true;
+						break;
+					case 378:
+					    stage.notemode = 5;
+						break;
+					case 416:
+						normo = false;
+						break;
+					case 441:
+					    stage.notemode = 1;
+						break;
+					case 509:
+					    stage.notemode = 2;
+						break;
+					case 637:
+					    stage.notemode = 4;
+						break;
+					case 748:
+						normo = true;
+						break;
+					case 765:
+					    stage.notemode = 5;
+						break;
+					case 814:
+						normo = false;
+						break;
+					case 956:
+					    stage.notemode = 3;
+						break;
+					case 1019:
+					    stage.notemode = 2;
+						break;
+				}
+			}
 
             if (stage.stage_id == StageId_2_2)
             {

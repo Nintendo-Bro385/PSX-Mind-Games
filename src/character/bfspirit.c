@@ -160,8 +160,8 @@ static const CharFrame char_bfs_frame[] = {
 	{BFS_ArcMain_Leftalt1, {  0,   0, 136, 215}, { 74+7, 205}},//40
 	{BFS_ArcMain_Downalt, {  0,   0, 128, 199}, { 66-19, 189}},//41
 	{BFS_ArcMain_Downalt, {128,   0, 128, 199}, { 66-19, 189}},//42
-	{BFS_ArcMain_Upalt, {  0,   0, 104, 225}, { 42-8, 114}},//43
-	{BFS_ArcMain_Upalt, {  104,   0, 104, 225}, { 42-8, 114}},//44
+	{BFS_ArcMain_Upalt, {  0,   0, 104, 225}, { 42-8, 215}},//43
+	{BFS_ArcMain_Upalt, {  104,   0, 104, 225}, { 42-8, 215}},//44
 	{BFS_ArcMain_Rightalt, {  0,   0, 120, 222}, { 58-20, 212}},//45
 	{BFS_ArcMain_Rightalt, {  120,   0, 120, 222}, { 58-20, 212}},//46
 	
