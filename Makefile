@@ -45,6 +45,7 @@ SRCS = src/main.c \
        src/character/titlegf.c \
        src/character/mbf.c \
        src/character/mgf.c \
+       src/character/mpsy.c \
        src/object.c \
        src/object/combo.c \
        src/object/splash.c \

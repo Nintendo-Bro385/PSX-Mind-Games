@@ -32,6 +32,7 @@
 #include "character/titlegf.h"
 #include "character/mbf.h"
 #include "character/mgf.h"
+#include "character/mpsy.h"
 
 //boolean loadsaveonce;
 //int menumusic = 0;
@@ -185,6 +186,7 @@ static struct
     Character *Titlepsy; //Title Psychic
     Character *mbf; //Menu Bf
     Character *mgf; //Menu Gf
+    Character *mpsy;
 } menu;
 
 static void CheckAndLoadWeek(int week)
@@ -506,15 +508,6 @@ void Menu_Load(MenuPage page)
         stage.loadsaveonce = true;
         }
     }
-
-    if (stage.upscroll == 1)
-    {
-    stage.prefs.downscroll =1;
-    }
-    else
-    {
-    stage.prefs.downscroll =0;
-    }
     //Load menu assets
     IO_Data menu_arc = IO_Read("\\MENU\\MENU.ARC;1");
     Gfx_LoadTex(&menu.tex_back,  Archive_Find(menu_arc, "back.tim"),  0);
@@ -535,8 +528,9 @@ void Menu_Load(MenuPage page)
     
     menu.TitleGF = Char_TitleGF_New(FIXED_DEC(62,1), FIXED_DEC(-12,1));
     menu.Titlepsy = Char_Titlepsy_New(FIXED_DEC(45,1), FIXED_DEC(94,1));
-    menu.mbf = Char_Mbf_New(FIXED_DEC(-0,1), FIXED_DEC(40,1));
-    menu.mgf = Char_Mgf_New(FIXED_DEC(100,1), FIXED_DEC(30,1));
+    menu.mbf = Char_Mbf_New(FIXED_DEC(11,1), FIXED_DEC(40,1));
+    menu.mgf = Char_Mgf_New(FIXED_DEC(91,1), FIXED_DEC(13,1));
+    menu.mpsy = Char_Mpsy_New(FIXED_DEC(-78,1), FIXED_DEC(116,1));
     stage.camera.x = stage.camera.y = FIXED_DEC(0,1);
     stage.camera.bzoom = FIXED_UNIT;
     stage.gf_speed = 4;
@@ -598,6 +592,7 @@ void Menu_Unload(void)
     Character_Free(menu.Titlepsy);
     Character_Free(menu.mgf);
     Character_Free(menu.mbf);
+    Character_Free(menu.mpsy);
     Mem_Free(menu.weeks);
 }
 
@@ -665,6 +660,7 @@ void Menu_Tick(void)
                 	Menu_DrawHealth(20, 76, 114, true);
                 	Menu_DrawHealth(22, 204, 115, true);
                 	Menu_DrawHealth(24, 140, 115, true);
+                	Menu_DrawHealth(35, 140, 147, true);
                 	Menu_DrawHealth(23, 76, 147, true);
                 	Menu_DrawHealth(33, 204, 147, true);
                 //Fallthrough
@@ -1517,7 +1513,10 @@ void Menu_Tick(void)
             //Draw menu characters
             menu.mgf->tick(menu.mgf);
             
-            Menu_DrawBG( 0, 24);
+            //Draw menu characters
+            menu.mpsy->tick(menu.mpsy);
+            
+            Menu_DrawBG( 1, 24);
             
             char weektext[30];
             sprintf(weektext, "\\MENU\\WEEK%d.TIM;1", menu.select);
@@ -1759,6 +1758,13 @@ void Menu_Tick(void)
 				    menu.page_param.stage.story = false;
 				    Trans_Start();
 				}
+				if (pad_state.press & PAD_TRIANGLE)
+				{
+				    menu.next_page = MenuPage_Stage;
+				    menu.page_param.stage.id = menu_options[menu.select].stage;
+				    menu.page_param.stage.story = true;
+				    Trans_Start();
+				}
 		        }
 		        else
 		        {
@@ -1768,6 +1774,13 @@ void Menu_Tick(void)
 				    menu.next_page = MenuPage_Stage;
 				    menu.page_param.stage.id = menu_options[menu.select].stage;
 				    menu.page_param.stage.story = true;
+				    Trans_Start();
+				}
+				if (pad_state.press & PAD_TRIANGLE)
+				{
+				    menu.next_page = MenuPage_Stage;
+				    menu.page_param.stage.id = menu_options[menu.select].stage;
+				    menu.page_param.stage.story = false;
 				    Trans_Start();
 				}
 		        }
@@ -2108,7 +2121,6 @@ void Menu_Tick(void)
                 {" "},
                 {" "},
                 {" "},
-                {" "},
                 {"flop engine"},
                 {" "},
                 {" "},
@@ -2142,8 +2154,7 @@ void Menu_Tick(void)
                 {"mrrumbleroses", 11, 24, 0xFF126000},
                 {"unstop4ble", 12, 23, 0xFF639bff},
                 {"igorsou3000", 13, 33, 0xFFfb6c23},
-                {"spicyjpeg", 18, 35, 0xFFfb6c23},
-                {"luka", 14, 34, 0xFFffe400},
+                {"spicyjpeg", 14, 35, 0xFFfb6c23},
                 {" ", 0, 6, 0xFFffe400},
                 {" ", 0, 6, 0xFF51ffb3},
                 {"nintendo bro", 15, 20, 0xFF51ffb3},
@@ -2515,19 +2526,25 @@ void Menu_Tick(void)
                 {
                     //Draw text
                     menu.font_arial.draw(&menu.font_arial,
-                        "Luka",
+                        "spicyjpeg",
                         256,
                         98,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
-                        "Star Sprite",
+                        "Movie & Save",
                         256,
                         110,
                         FontAlign_Center
                     );
-                    //Draw luka about pic
-                    Menu_DrawBigCredits(9, 224, 16);
+                    menu.font_arial.draw(&menu.font_arial,
+                        "code",
+                        256,
+                        122,
+                        FontAlign_Center
+                    );
+                    //Draw ckdev about pic
+                    Menu_DrawBigCredits(13, 224, 16);
                     break;
                 }
                 case 15:
@@ -2598,31 +2615,6 @@ void Menu_Tick(void)
                     );
                     //Draw ckdev about pic
                     Menu_DrawBigCredits(4, 224, 16);
-                    break;
-                }
-                case 18:
-                {
-                    //Draw text
-                    menu.font_arial.draw(&menu.font_arial,
-                        "spicyjpeg",
-                        256,
-                        98,
-                        FontAlign_Center
-                    );
-                    menu.font_arial.draw(&menu.font_arial,
-                        "Movie & Save",
-                        256,
-                        110,
-                        FontAlign_Center
-                    );
-                    menu.font_arial.draw(&menu.font_arial,
-                        "code",
-                        256,
-                        122,
-                        FontAlign_Center
-                    );
-                    //Draw ckdev about pic
-                    Menu_DrawBigCredits(13, 224, 16);
                     break;
                 }
                     
@@ -2771,7 +2763,6 @@ void Menu_Tick(void)
                 //{OptType_Boolean, "GHOST TAP ", &stage.prefs.ghost, {.spec_boolean = {0}}},
                 {OptType_Boolean, "DOWNSCROLL", &stage.prefs.downscroll, {.spec_boolean = {0}}},
                 {OptType_Boolean, "BOTPLAY", &stage.prefs.botplay, {.spec_boolean = {0}}},
-                {OptType_Boolean, "MISS ANIMATIONS", &stage.prefs.missanim, {.spec_boolean = {0}}},
                 {OptType_Boolean, "LOW QUALITY", &stage.prefs.lowquality, {.spec_boolean = {0}}},
             };
             

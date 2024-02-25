@@ -36,8 +36,12 @@ typedef struct
 	Gfx_Tex tex_floor; //Floor
 
 	Gfx_Tex tex_junk; //tipped chair, table and spilled tea
+	
+	Gfx_Tex tex_junkred; //tipped chair, table and spilled tea
 
-	Gfx_Tex tex_fireplace; //ruined fireplace
+	Gfx_Tex tex_fireplared; //ruined fireplace
+	
+	Gfx_Tex tex_fireplace; //ruined fireplacer
 
 	//AAAHHH
 	//FireL state
@@ -214,8 +218,8 @@ void Back_FlameC_DrawFG(StageBack *back)
 	{
 		if (phase2 == 1)
 		{
-			FlameC_FireL_Draw(this, FIXED_DEC(250,1) - fx, FIXED_DEC(41,1) - fy); //fire fg right
-			FlameC_FireM_Draw(this, FIXED_DEC(-210,1) - fx, FIXED_DEC(31,1) - fy); //fire fg left
+			FlameC_FireL_Draw(this, FIXED_DEC(250,1) - fx, FIXED_DEC(41+40,1) - fy); //fire fg right
+			FlameC_FireM_Draw(this, FIXED_DEC(-210+10,1) - fx, FIXED_DEC(31,1) - fy); //fire fg left
 		}
 	}
 	}
@@ -273,15 +277,15 @@ void Back_FlameC_DrawBG(StageBack *back)
 	RECT chair_src = {0, 0, 122, 123};
 	RECT_FIXED chair_dst = {
 		FIXED_DEC(-170 - SCREEN_WIDEOADD2,1) - fx,
-		FIXED_DEC(25,1) - fy,
+		FIXED_DEC(25+41,1) - fy,
 		FIXED_DEC(122 + SCREEN_WIDEOADD,1),
 		FIXED_DEC(123,1)
 	};
 
 	RECT table_src = {122, 0, 70, 63};
 	RECT_FIXED table_dst = {
-		FIXED_DEC(280 - SCREEN_WIDEOADD2,1) - fx,
-		FIXED_DEC(50,1) - fy,
+		FIXED_DEC(280+10 - SCREEN_WIDEOADD2,1) - fx,
+		FIXED_DEC(50+23,1) - fy,
 		FIXED_DEC(70 + SCREEN_WIDEOADD,1),
 		FIXED_DEC(63,1)
 	};
@@ -289,7 +293,7 @@ void Back_FlameC_DrawBG(StageBack *back)
 	RECT tea_src = {122, 63, 48, 33};
 	RECT_FIXED tea_dst = {
 		FIXED_DEC(290 - SCREEN_WIDEOADD2,1) - fx,
-		FIXED_DEC(113,1) - fy,
+		FIXED_DEC(113+22,1) - fy,
 		FIXED_DEC(48 + SCREEN_WIDEOADD,1),
 		FIXED_DEC(33,1)
 	};
@@ -305,22 +309,39 @@ void Back_FlameC_DrawBG(StageBack *back)
 	{
 	if (finale == 0)
 	{
+		if (phase2==1)
+		{
+		Stage_DrawTex(&this->tex_junkred, &table_src, &table_dst, stage.camera.bzoom); //tipped table
+		Stage_DrawTex(&this->tex_junkred, &tea_src, &tea_dst, stage.camera.bzoom); //spilled tea
+		Stage_DrawTex(&this->tex_junkred, &chair_src, &chair_dst, stage.camera.bzoom); //tipped chair
+		}
+		else
+		{
 		Stage_DrawTex(&this->tex_junk, &table_src, &table_dst, stage.camera.bzoom); //tipped table
 		Stage_DrawTex(&this->tex_junk, &tea_src, &tea_dst, stage.camera.bzoom); //spilled tea
 		Stage_DrawTex(&this->tex_junk, &chair_src, &chair_dst, stage.camera.bzoom); //tipped chair
+		}
 
 		if (phase2 == 1)
 		{
-			FlameC_FireM_Draw(this, FIXED_DEC(-112,1) - fx, FIXED_DEC(-5,1) - fy); //fire phase 2 left
-			FlameC_FireR_Draw(this, FIXED_DEC(232,1) - fx, FIXED_DEC(1,1) - fy); //fire phase 2 right
+			FlameC_FireM_Draw(this, FIXED_DEC(-112,1) - fx, FIXED_DEC(10,1) - fy); //fire phase 2 left back
+			FlameC_FireR_Draw(this, FIXED_DEC(-112-10,1) - fx, FIXED_DEC(-5,1) - fy); //fire phase 2 left front
+			FlameC_FireM_Draw(this, FIXED_DEC(232,1) - fx, FIXED_DEC(20,1) - fy); //fire phase 2 right back
+			FlameC_FireR_Draw(this, FIXED_DEC(232-10,1) - fx, FIXED_DEC(-5,1) - fy); //fire phase 2 right front
 		}
 
 		FlameC_FireM_Draw(this, FIXED_DEC(62,1) - fx, FIXED_DEC(-11,1) - fy); //fire middle
 		FlameC_FireL_Draw(this, FIXED_DEC(-22,1) - fx, FIXED_DEC(11,1) - fy); //fire left
 		FlameC_FireR_Draw(this, FIXED_DEC(162,1) - fx, FIXED_DEC(1,1) - fy); //fire right
-
-
+		
+		if (phase2==1)
+		{
+		Stage_DrawTex(&this->tex_fireplared, &fireplace_src, &fireplace_dst, stage.camera.bzoom); //ruined fireplace
+		}
+		else
+		{
 		Stage_DrawTex(&this->tex_fireplace, &fireplace_src, &fireplace_dst, stage.camera.bzoom); //ruined fireplace
+		}
 		Stage_DrawTex(&this->tex_floor, &floorl_src, &floorl_dst, stage.camera.bzoom); //floor left
 		Stage_DrawTex(&this->tex_floor, &floorr_src, &floorr_dst, stage.camera.bzoom); //floor right
 		if (phase2 == 1)
@@ -373,7 +394,9 @@ StageBack *Back_FlameC_New(void)
 	Gfx_LoadTex(&this->tex_back1, Archive_Find(arc_back, "back1.tim"), 0);
 	Gfx_LoadTex(&this->tex_floor, Archive_Find(arc_back, "floor.tim"), 0);
 	Gfx_LoadTex(&this->tex_junk, Archive_Find(arc_back, "junk.tim"), 0);
+	Gfx_LoadTex(&this->tex_junkred, Archive_Find(arc_back, "junkred.tim"), 0);
 	Gfx_LoadTex(&this->tex_fireplace, Archive_Find(arc_back, "fplace.tim"), 0);
+	Gfx_LoadTex(&this->tex_fireplared, Archive_Find(arc_back, "fplared.tim"), 0);
 	Mem_Free(arc_back);
 
 	//load the flame arcs

@@ -15,7 +15,7 @@ iso/music/%.xa:
 	tools/xainterleave/xainterleave $@
 
 # XA interleaves
-iso/music/menu.xa: iso/music/freaky.xa iso/music/gameover.xa
+iso/music/menu.xa: iso/music/freaky.xa iso/music/gameover.xa iso/music/gameoveruproar.xa
 iso/music/week1a.xa: iso/music/psychici.xa iso/music/psychicv.xa iso/music/wilteri.xa iso/music/wilterv.xa
 iso/music/week1b.xa: iso/music/uproari.xa iso/music/uproarv.xa iso/music/freeky.xa iso/music/ludum.xa
 iso/music/week2a.xa: iso/music/psychicoi.xa iso/music/psychicov.xa iso/music/latedrivei.xa iso/music/latedrivev.xa

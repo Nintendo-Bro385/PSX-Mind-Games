@@ -169,7 +169,7 @@ typedef struct
 	struct
 	{
 		//Stage settings
-		boolean ghost, downscroll, botplay, lowquality, missanim, secretunlocked, secretunlocked2, expsync;
+		boolean ghost, downscroll, botplay, lowquality, secretunlocked, secretunlocked2, expsync;
 		int menumusic;
 		//int psymisses, wiltmisses, uproarmisses;
 		boolean bweek_awards, mpsy_awards, mwilt_awards, mup_awards, dsu_awards, udemo_awards, bdweek_awards, flopg_awards, debugger_awards, nomissfw, nomissdw, no_memory_card;

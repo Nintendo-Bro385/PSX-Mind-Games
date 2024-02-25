@@ -140,11 +140,11 @@ static const Animation char_senpaib_anim[PlayerAnim_Max] = {
 	{5, (const u8[]){21, ASCR_REPEAT}},                                                       //PlayerAnim_Dead1
 	{3, (const u8[]){22, 23, 24, 25, 25, 25, 25, 25, 25, 25, ASCR_CHGANI, PlayerAnim_Dead3}}, //PlayerAnim_Dead2
 	{3, (const u8[]){25, ASCR_REPEAT}},                                                       //PlayerAnim_Dead3
-	{3, (const u8[]){26, 26, 27, 27, 28, 28, 29, 29, ASCR_CHGANI, PlayerAnim_Dead3}},             //PlayerAnim_Dead4
-	{3, (const u8[]){26, 26, 27, 27, 28, 28, 29, 29, ASCR_CHGANI, PlayerAnim_Dead3}},             //PlayerAnim_Dead5
+	{3, (const u8[]){26, 27, 28, 29, 28, 27, 26, ASCR_CHGANI, PlayerAnim_Dead3}},             //PlayerAnim_Dead4
+	{3, (const u8[]){26, 27, 28, 29, 28, 27, 26, ASCR_CHGANI, PlayerAnim_Dead3}},             //PlayerAnim_Dead5
 	
-	{10, (const u8[]){29, 28, 27, 26, ASCR_BACK, 1}}, //PlayerAnim_Dead4
-	{ 3, (const u8[]){29, 28, 27, 26, ASCR_REPEAT}},  //PlayerAnim_Dead5
+	{10, (const u8[]){26, 27, 28, 29, 28, 27, 26, ASCR_BACK, 1}}, //PlayerAnim_Dead4
+	{ 3, (const u8[]){26, 27, 28, 29, 28, 27, 26, ASCR_REPEAT}},  //PlayerAnim_Dead5
 };
 
 //SenpaiB character functions

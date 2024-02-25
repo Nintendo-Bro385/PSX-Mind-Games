@@ -10,6 +10,7 @@ static const XA_TrackDef xa_tracks[] = {
 	//MENU.XA
 	{XA_Menu, XA_LENGTH(17000)}, //XA_GettinFreaky
 	{XA_Menu, XA_LENGTH(3840)},  //XA_GameOver
+	{XA_Menu, XA_LENGTH(960)},  //XA_GameOveruproar
 	//WEEK1A.XA
 	{XA_Week1A, XA_LENGTH(11800)}, //XA_Psychic
 	{XA_Week1A, XA_LENGTH(11400)}, //XA_Wilter

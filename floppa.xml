@@ -143,6 +143,7 @@
 				<file name = "titlepsy.arc" type = "data" source = "iso/titlepsy/main.arc"/>
 				<file name = "Mbf.arc" type = "data" source = "iso/menu/characters/mbf.arc"/>
 				<file name = "Mgf.arc" type = "data" source = "iso/menu/characters/mgf.arc"/>
+				<file name = "Mpsy.arc" type = "data" source = "iso/menu/characters/mpsy.arc"/>
 				
 				<file name = "sendai.arc" type = "data" source = "iso/sendai/main.arc"/>
 				<file name = "bft.arc" type = "data" source = "iso/bft/hell.arc"/>

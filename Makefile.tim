@@ -32,17 +32,10 @@ all: \
 	iso/titlegf/main.arc \
 	iso/menu/characters/mbf.arc \
 	iso/menu/characters/mgf.arc \
+	iso/menu/characters/mpsy.arc \
 	iso/sendai/main.arc \
 	iso/bft/hell.arc \
 	iso/week1/back.arc \
-	iso/week2/back.arc \
-	iso/week3/back.arc \
-	iso/week4/back.arc \
-	iso/week4/hench.arc \
-	iso/week5/back.arc \
-	iso/week6/back.arc \
-	iso/week6/back3.tim \
-	iso/week7/back.arc \
 	iso/fplacechop/back.arc \
 	iso/flopchop/back.arc \
 	iso/flamec/back.arc \
@@ -102,7 +95,9 @@ iso/titlegf/main.arc: iso/titlegf/gf.tim iso/titlegf/gfb.tim iso/titlegf/gfc.tim
 iso/menu/characters/mbf.arc: iso/menu/characters/menubf.tim
 
 # Menu GF
-iso/menu/characters/mgf.arc: iso/menu/characters/menugf.tim
+iso/menu/characters/mgf.arc: iso/menu/characters/menugf0.tim iso/menu/characters/menugf1.tim
+
+iso/menu/characters/mpsy.arc: iso/menu/characters/mpsy.tim
 
 iso/sendai/main.arc: iso/sendai/panic.tim iso/sendai/pain0.tim iso/sendai/pain1.tim iso/sendai/die0.tim iso/sendai/die1.tim iso/sendai/die2.tim
 
@@ -112,31 +107,12 @@ iso/bft/hell.arc: iso/bft/idle.tim iso/bft/oof.tim iso/bft/eh.tim iso/bft/eey.ti
 # Week 1
 iso/week1/back.arc: iso/week1/back0.tim iso/week1/back1.tim
 
-# Week 2
-iso/week2/back.arc: iso/week2/back0.tim iso/week2/back1.tim iso/week2/back2.tim
-
-# Week 3
-iso/week3/back.arc: iso/week3/back0.tim iso/week3/back1.tim iso/week3/back2.tim iso/week3/back3.tim iso/week3/back4.tim iso/week3/back5.tim
-
-# Week 4
-iso/week4/back.arc: iso/week4/back0.tim iso/week4/back1.tim iso/week4/back2.tim iso/week4/back3.tim
-iso/week4/hench.arc: iso/week4/hench0.tim iso/week4/hench1.tim
-
-# Week 5
-iso/week5/back.arc: iso/week5/back0.tim iso/week5/back1.tim iso/week5/back2.tim iso/week5/back3.tim iso/week5/back4.tim iso/week5/back5.tim
-
-# Week6
-iso/week6/back.arc: iso/week6/back0.tim iso/week6/back1.tim iso/week6/back2.tim
-
-# Week 7
-iso/week7/back.arc: iso/week7/back0.tim iso/week7/back1.tim iso/week7/back2.tim iso/week7/back3.tim
-
 iso/fplacechop/back.arc: iso/fplacechop/back0.tim iso/fplacechop/back0p.tim iso/fplacechop/back1.tim iso/fplacechop/back1p.tim iso/fplacechop/floor.tim iso/fplacechop/floorp.tim iso/fplacechop/junk.tim iso/fplacechop/junkp.tim iso/fplacechop/fplace.tim iso/fplacechop/fplacep.tim
 
 iso/flopchop/back.arc: iso/flopchop/back0.tim iso/flopchop/back1.tim iso/flopchop/floor.tim iso/flopchop/junk.tim iso/flopchop/fplace.tim
 
 #flamec chop
-iso/flamec/back.arc: iso/flamec/back0.tim iso/flamec/back1.tim iso/flamec/floor.tim iso/flamec/fplace.tim iso/flamec/junk.tim
+iso/flamec/back.arc: iso/flamec/back0.tim iso/flamec/back1.tim iso/flamec/floor.tim iso/flamec/fplace.tim iso/flamec/fplared.tim iso/flamec/junk.tim iso/flamec/junkred.tim
 iso/flamec/firel.arc: iso/flamec/firel0.tim iso/flamec/firel1.tim
 iso/flamec/firem.arc: iso/flamec/firem0.tim iso/flamec/firem1.tim
 iso/flamec/firer.arc: iso/flamec/firer0.tim iso/flamec/firer1.tim

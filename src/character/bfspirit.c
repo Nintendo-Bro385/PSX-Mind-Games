@@ -221,9 +221,12 @@ static const Animation char_bfs_anim[PlayerAnim_Max] = {
 	{1, (const u8[]){ 15, 25, 25, 25, ASCR_BACK, 1}},     //PlayerAnim_UpMiss
 	{1, (const u8[]){19, 26, 26, 26, ASCR_BACK, 1}},     //PlayerAnim_RightMiss
 	
-	{5, (const u8[]){27, 28, 29, 30, 30, 30, 30, 30, 30, 30, ASCR_CHGANI, PlayerAnim_Dead1}}, //PlayerAnim_Dead0
+	{0, (const u8[]){0,}},
+	{0, (const u8[]){0,}},
+
+	{5, (const u8[]){27, 28, 29, 30, 30, ASCR_CHGANI, PlayerAnim_Dead1}}, //PlayerAnim_Dead0
 	{5, (const u8[]){30, ASCR_REPEAT}},                                                       //PlayerAnim_Dead1
-	{3, (const u8[]){31, 32, 33, 34, 34, 34, 34, 34, 34, 34, ASCR_CHGANI, PlayerAnim_Dead3}}, //PlayerAnim_Dead2
+	{3, (const u8[]){31, 34, 34, 34, 34, 34, 34, 34, ASCR_CHGANI, PlayerAnim_Dead3}}, //PlayerAnim_Dead2
 	{3, (const u8[]){34, ASCR_REPEAT}},                                                       //PlayerAnim_Dead3
 	{3, (const u8[]){35, 36, 34, 34, 34, 34, 34, ASCR_CHGANI, PlayerAnim_Dead3}},             //PlayerAnim_Dead4
 	{3, (const u8[]){37, 38, 34, 34, 34, 34, 34, ASCR_CHGANI, PlayerAnim_Dead3}},             //PlayerAnim_Dead5
@@ -385,7 +388,7 @@ void Char_BFS_Tick(Character *character)
 					skull_dim,
 					skull_dim,
 				};
-				Stage_DrawTex(&this->tex_retry, &frag_src, &frag_dst, FIXED_MUL(stage.camera.zoom, stage.bump));
+				
 				
 				//Move fragment
 				frag->x += frag->xsp;
@@ -413,12 +416,12 @@ void Char_BFS_Tick(Character *character)
 		};
 		
 		//Cross - Retry
-		Stage_DrawTex(&this->tex_retry, &button_src, &button_dst, FIXED_MUL(stage.camera.zoom, stage.bump));
+		//Stage_DrawTex(&this->tex_retry, &button_src, &button_dst, FIXED_MUL(stage.camera.zoom, stage.bump));
 		
 		//Circle - Blueball
 		button_src.x = 16;
 		button_dst.y += FIXED_DEC(56,1);
-		Stage_DrawTex(&this->tex_retry, &button_src, &button_dst, FIXED_MUL(stage.camera.zoom, stage.bump));
+		//Stage_DrawTex(&this->tex_retry, &button_src, &button_dst, FIXED_MUL(stage.camera.zoom, stage.bump));
 		
 		//Draw 'RETRY'
 		u8 retry_frame;

@@ -155,9 +155,6 @@ Character *Char_OldPsychic_New(fixed_t x, fixed_t y)
 	Animatable_Init(&this->character.animatable, char_oldpsychic_anim);
 	Character_Init((Character*)this, x, y);
 	
-	//Set character information
-	this->character.spec = CHAR_SPEC_MISSANIM;
-	
 	this->character.health_i = 2;
 	
 	this->character.focus_x = FIXED_DEC(65,1);
