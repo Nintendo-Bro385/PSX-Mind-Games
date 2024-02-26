@@ -2899,10 +2899,6 @@ void Stage_Tick(void)
 				    		if (stage.psymisses == 0 && stage.wiltmisses == 0 && stage.uproarmisses == 0)
 				    		{
 				    			stage.prefs.nomissfw = true;
-				    			if(stage.prefs.nomissfw == true && stage.prefs.nomissdw == true)
-				    			{
-				    			stage.prefs.secretunlocked2 = true;
-				    			}
 				    		}
 		            			}
 				    		
@@ -2917,10 +2913,6 @@ void Stage_Tick(void)
 				    		if (stage.psyomisses == 0 && stage.latedrivemisses == 0)
 				    		{
 				    			stage.prefs.nomissdw = true;
-				    			if(stage.prefs.nomissfw == true && stage.prefs.nomissdw == true)
-				    			{
-				    			stage.prefs.secretunlocked2 = true;
-				    			}
 				    		}
 				    		
 				    	}

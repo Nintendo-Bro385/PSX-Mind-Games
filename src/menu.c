@@ -29,6 +29,7 @@
 #include "stdlib.h"
 
 #include "character/titlepsy.h"
+#include "character/flopchic.h"
 #include "character/titlegf.h"
 #include "character/mbf.h"
 #include "character/mgf.h"
@@ -188,6 +189,7 @@ static struct
     
     Character *TitleGF; //Title GF
     Character *Titlepsy; //Title Psychic
+    Character *Flopchic;
     Character *mbf; //Menu Bf
     Character *mgf; //Menu Gf
     Character *mpsy;
@@ -532,6 +534,7 @@ void Menu_Load(MenuPage page)
     
     menu.TitleGF = Char_TitleGF_New(FIXED_DEC(62,1), FIXED_DEC(-12,1));
     menu.Titlepsy = Char_Titlepsy_New(FIXED_DEC(45,1), FIXED_DEC(94,1));
+    menu.Flopchic = Char_Flopchic_New(FIXED_DEC(45,1), FIXED_DEC(94,1));
     menu.mbf = Char_Mbf_New(FIXED_DEC(11,1), FIXED_DEC(40,1));
     menu.mgf = Char_Mgf_New(FIXED_DEC(91,1), FIXED_DEC(13,1));
     menu.mpsy = Char_Mpsy_New(FIXED_DEC(-78,1), FIXED_DEC(116,1));
@@ -594,6 +597,7 @@ void Menu_Unload(void)
     //Free title Girlfriend
     Character_Free(menu.TitleGF);
     Character_Free(menu.Titlepsy);
+    Character_Free(menu.Flopchic);
     Character_Free(menu.mgf);
     Character_Free(menu.mbf);
     Character_Free(menu.mpsy);
@@ -802,6 +806,10 @@ void Menu_Tick(void)
     	    {
             	//Draw Title psychic
             	menu.TitleGF->tick(menu.TitleGF);
+            }
+            else if(stage.prefs.menumusic == 2 && stage.prefs.flopg_awards ==true)
+            {
+            	menu.Flopchic->tick(menu.Flopchic);
             }
             else
             {
@@ -1189,12 +1197,7 @@ void Menu_Tick(void)
     		if (stage.prefs.flopg_awards == true)
             {
                 fgicon=18; 
-                fgt="No Missed Full & Demo Week On Hard";
-
-                if (!stage.prefs.no_memory_card)
-                {
-                    Menu_DrawHealth(5, 181, 8, true);
-                }
+                fgt="Found the secret";
             }
     	 	else
             {
@@ -1235,6 +1238,13 @@ void Menu_Tick(void)
                 dbicon=10; 
                 debugt="?";
             }
+                 if (!stage.prefs.no_memory_card)
+                {
+                    if(stage.prefs.nomissfw == true && stage.prefs.nomissdw == true)
+                    {
+                    Menu_DrawHealth(5, 181, 8, true);
+                    }
+                }
 	 	
     	 	if (stage.prefs.lowquality == 1)
     	 	{
@@ -2001,7 +2011,7 @@ void Menu_Tick(void)
 		    	{
 			    	//Draw page label
 				    menu.font_arial.draw(&menu.font_arial,
-					"No miss the full & demo week on hard",
+					"A secret is required to unlock, hint credits page",
 					16,
 					217,
 					FontAlign_Left
@@ -2459,6 +2469,14 @@ void Menu_Tick(void)
                         170,
                         FontAlign_Center
                     );
+                    if (pad_state.press & (PAD_START | PAD_CROSS))
+                    {
+		    	Audio_StopXA();
+		    	Audio_PlayXA_Track(XA_Ludum, 0x40, 3, 1);
+		    	stage.prefs.menumusic =2;
+		    	stage.prefs.secretunlocked2 = true;
+		        stage.prefs.flopg_awards =true;
+                    }
                     //Draw nintendobro about pic
                     Menu_DrawBigCredits(0, 224, 16);
                     break;
