@@ -124,6 +124,7 @@
 				<!-- Psychic assets -->
 				<file name = "psychico.arc" type = "data" source = "iso/oldpsychic/main.arc"/>
 				<file name = "psychic.arc" type = "data" source = "iso/psychic/main.arc"/>
+				<file name = "flopchic.arc" type = "data" source = "iso/flopchic/main.arc"/>
 				
 				<!-- Senpai assets -->
 				<file name = "senpaib.arc" type = "data" source = "iso/senpaib/main.arc"/>

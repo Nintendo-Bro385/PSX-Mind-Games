@@ -36,9 +36,12 @@ const char *anotherfuckingvarible = "EASY";
 const char *pausestage = "PSYCHIC";
 int pausediff2;
 int diabox;
+int unpausedelay;
+int delay;
 
 boolean normo;
 boolean paused;
+boolean win;
 
 //Stage constants
 //#define STAGE_PERFECT //Play all notes perfectly
@@ -121,6 +124,7 @@ boolean nohud;
 #include "character/psychic.h"
 #include "character/senpaib.h"
 #include "character/bfspirit.h"
+#include "character/flopchic.h"
 #include "character/sendai.h"
 #include "character/bft.h"
 
@@ -328,6 +332,10 @@ static u8 Stage_HitNote(PlayerState *this, u8 type, fixed_t offset)
     //Restore vocals and health
     Stage_StartVocal();
     this->health += 230;
+    if(this->health>=18000)
+    {
+        win=true;
+    }
     
     //Create combo object telling of our combo
     Obj_Combo *combo = Obj_Combo_New(
@@ -1395,6 +1403,7 @@ static void Stage_LoadState(void)
     
     normo = false;
     paused = false;
+    win=false;
     
         if(stage.stage_diff == StageDiff_Easy){pausediff = "EASY";}
 	if(stage.stage_diff == StageDiff_Normal){pausediff = "NORMAL";}
@@ -2165,6 +2174,17 @@ void Stage_Tick(void)
     {
         case StageState_Play:
         {
+        	if(stage.mode == StageMode_Swap)
+        	{
+        	stage.prefs.swap_awards =true;
+        	}
+        	if(stage.mode == StageMode_2P)
+        	{
+        		if (pad_state_2.press & PAD_CROSS)
+        		{
+        			stage.prefs.two_awards =true;
+        		}
+        	}
         	if(loadonce ==false)
         	{
         	FontData_Load(&stage.font_bold, Font_Bold);
@@ -2200,11 +2220,14 @@ void Stage_Tick(void)
 		        if (pad_state.press & PAD_START && stage.stage_id != StageId_1_5 && stage.stage_id != StageId_1_6)
 			{
 			    stage.pause_select = 0;
+			    unpausedelay=6;
+			    delay=5;
 			    paused =true;
 			}
 		}
 	            if (paused ==true)
 			{
+			
 			    switch(pausediff2)
 			    {
 			    	case 0:
@@ -2263,18 +2286,28 @@ void Stage_Tick(void)
 		            else
 		                stage.pause_select = 0;
 		        }
+		        if(delay<=-1)
+		        {
 			  //Select option if cross or start is pressed
 			    switch (stage.pause_select)
 			    {
 			      case 0: //Resume
-			        if (pad_state.press & PAD_CROSS)
+			        if (pad_state.press & (PAD_START | PAD_CROSS))
 			  	{
-					paused = false;
-					Audio_ResumeXA();
+					unpausedelay=5;
 				}
+				if(unpausedelay>=0 && unpausedelay<=5)
+				    {
+				    	unpausedelay--;
+				    }
+				    if(unpausedelay<=-1)
+				    {
+				    	paused = false;
+					Audio_ResumeXA();
+				    }
 				break;
 			      case 1: //Retry
-			        if (pad_state.press & PAD_CROSS && paused ==true)
+			        if (pad_state.press & (PAD_START | PAD_CROSS))
 			  	{
 					stage.trans = StageTrans_Reload;
 					Trans_Start();
@@ -2295,7 +2328,7 @@ void Stage_Tick(void)
 				    else
 					pausediff2 = 0;
 				}
-				if (pad_state.press & PAD_CROSS && paused ==true)
+				if (pad_state.press & (PAD_START | PAD_CROSS))
 			  	{
 			  		stage.trans = StageTrans_Reload;
 					Trans_Start();
@@ -2309,13 +2342,18 @@ void Stage_Tick(void)
 				    );
 				break;
 			      case 3: //Quit
-			        if (pad_state.press & PAD_CROSS && paused ==true)
+			        if (pad_state.press & (PAD_START | PAD_CROSS))
 			  	{
 				stage.trans = StageTrans_Menu;
 				Trans_Start();
 				}
 				break;
 			    }
+			  }
+			  else
+			  {
+			  delay--;
+			  }
 			  s32 ext_scroll = stage.pause_select * FIXED_DEC(12,1);
 			  stage.pause_scroll += (ext_scroll - stage.pause_scroll) >> 2;
 			  //Draw all options
@@ -2499,6 +2537,12 @@ void Stage_Tick(void)
                     case 190:
                         stage.notemode = 2;
                         break;
+                    case 381:
+                        stage.notemode = 3;
+                        break;
+                    case 448:
+                        stage.notemode = 2;
+                        break;
                     case 511:
                         stage.notemode = 6;
                         break;
@@ -2572,11 +2616,48 @@ void Stage_Tick(void)
                     	stopdownscroll = 0;
                     	stage.notemode = 2;
                     	break;
-                    case 960:
-                    	stage.notemode = 1;
+                    case 954:
+                    	win=false;
                     	break;
+                    case 960:
+                    	if(win==true)
+                    	{
+                    		stage.notemode = 6;
+                    	}
+                    	else
+                    	{
+                    		stage.notemode = 1;
+                    	}
+                    	break;
+                    case 969:
+                    {
+                    	if(win==true)
+                    	{
+                    	            note1x = -26;
+				    note2x = -60;
+				    note3x = -94;
+				    note4x = -128;
+
+				    note5x = 26;
+				    note6x = 60;
+				    note7x = 94;
+				    note8x = 128;
+				    
+			}
+			break;
+                    }
                     case 1092:
-                    	stage.notemode = 2;
+                    	if(win==true)
+                    	{
+                    		stage.notemode = 7;
+                    	}
+                    	else
+                    	{
+                    		stage.notemode = 2;
+                    	}
+                    	break;
+                    case 1098:
+                    	stage.notemode = 0;
                     	break;
                     
                 }
@@ -2818,6 +2899,10 @@ void Stage_Tick(void)
 				    		if (stage.psymisses == 0 && stage.wiltmisses == 0 && stage.uproarmisses == 0)
 				    		{
 				    			stage.prefs.nomissfw = true;
+				    			if(stage.prefs.nomissfw == true && stage.prefs.nomissdw == true)
+				    			{
+				    			stage.prefs.secretunlocked2 = true;
+				    			}
 				    		}
 		            			}
 				    		
@@ -2832,7 +2917,10 @@ void Stage_Tick(void)
 				    		if (stage.psyomisses == 0 && stage.latedrivemisses == 0)
 				    		{
 				    			stage.prefs.nomissdw = true;
+				    			if(stage.prefs.nomissfw == true && stage.prefs.nomissdw == true)
+				    			{
 				    			stage.prefs.secretunlocked2 = true;
+				    			}
 				    		}
 				    		
 				    	}
@@ -3469,15 +3557,15 @@ void Stage_Tick(void)
                 int port2;//player#
                 int diaboxes;
             }psydia[] = {
-                {"What brings you here so late at night?",1, 0, 15, 0},
-                {"Beep.",0, 15, 6, 0},
-                {"Drop the act already.",1, 3, 15, 1},
-                {"I could feel your malicious intent the\nmoment you set foot in here.",1, 0, 15, 0},
-                {"Bep bee aa skoo dep?",0, 15, 12, 0},
-                {"I wouldn't try the door if I were you.",1, 4, 15, 0},
-                {"Now...",1, 2, 15, 0},
-                {"I have a couple of questions to ask you...",1, 0, 15, 0},
-                {"And you WILL answer them.",1, 3, 15, 0},
+                {"What brings you here so late at night?",0, 0, 15, 0},
+                {"Beep.",1, 15, 6, 0},
+                {"Drop the act already.",0, 3, 15, 1},
+                {"I could feel your malicious intent the\nmoment you set foot in here.",0, 0, 15, 0},
+                {"Bep bee aa skoo dep?",1, 15, 12, 0},
+                {"I wouldn't try the door if I were you.",0, 4, 15, 0},
+                {"Now...",0, 2, 15, 0},
+                {"I have a couple of questions to ask you...",0, 0, 15, 0},
+                {"And you WILL answer them.",0, 3, 15, 0},
             };
             
 
@@ -3489,22 +3577,22 @@ void Stage_Tick(void)
                 int port2;
                 int diaboxes;
             }wiltdia[] = {
-                {"Welp, you got me!",0, 15, 7, 0},
-                {"You're very clever, I'll give you that much.",0, 15, 7, 0},
-                {"No ordinary person would have seen\nthrough my facade.",0, 15, 7, 0},
-                {"Yeah, um...",1, 5, 15, 0},
-                {"...Who are you again?",1, 4, 15, 0},
-                {"Kh...!",0, 15, 8, 0},
-                {"You don't even remember me?!",0, 15, 8, 0},
-                {"Not in the slightest.",1, 2, 15, 0},
-                {"Seriously?! W-Whatever!",0, 15, 9, 1},
-                {"Now listen here!",0, 15, 9, 0},
-                {"I've taken this body hostage, so\ndon't even try anything!",0, 15, 9, 0},
-                {"Summon Daddy Dearest here this instant,\nor else he gets it!",0, 15, 9, 0},
-                {"...Daddy Dearest, huh..?",1, 2, 15, 0},
-                {"I don't know what your deal is, but...",1, 5, 15, 0},
-                {"I don't take commands from freaks of\nnature like you.",1, 3, 15, 0},
-                {"What did you just call me?!",0, 15, 10, 1},
+                {"Welp, you got me!",1, 15, 7, 0},
+                {"You're very clever, I'll give you that much.",1, 15, 7, 0},
+                {"No ordinary person would have seen\nthrough my facade.",1, 15, 7, 0},
+                {"Yeah, um...",0, 5, 15, 0},
+                {"...Who are you again?",0, 4, 15, 0},
+                {"Kh...!",1, 15, 8, 0},
+                {"You don't even remember me?!",1, 15, 8, 0},
+                {"Not in the slightest.",0, 2, 15, 0},
+                {"Seriously?! W-Whatever!",1, 15, 9, 1},
+                {"Now listen here!",1, 15, 9, 0},
+                {"I've taken this body hostage, so\ndon't even try anything!",1, 15, 9, 0},
+                {"Summon Daddy Dearest here this instant,\nor else he gets it!",1, 15, 9, 0},
+                {"...Daddy Dearest, huh..?",0, 2, 15, 0},
+                {"I don't know what your deal is, but...",0, 5, 15, 0},
+                {"I don't take commands from freaks of\nnature like you.",0, 3, 15, 0},
+                {"What did you just call me?!",1, 15, 10, 1},
             };
 
             static const struct
@@ -3515,15 +3603,15 @@ void Stage_Tick(void)
                 int port2;
             }uproardia[] = {
             
-                {"At least that guy's gone, he was\ngetting on my nerves.",1, 1, 15},
-                {"Let me guess, you're another thorn\nin my side, huh?",1, 5, 15},
-                {". . .",0, 15, 11},
-                {"...You took the words straight\nfrom my mouth...",0, 15, 11},
-                {"I had finally escaped that wretched\ngame, and of course YOU are here to greet me...",0, 15, 11},
-                {"...No matter...",0, 15, 11},
-                {"...I'll just kill you and finally get\nmy revenge... It's really that simple...",0, 15, 11},
-                {"...You don't mind your body being\ndissipated, right? It's only fair...",0, 15, 11},
-                {"You took the words straight from my mouth.",1, 3, 15},
+                {"At least that guy's gone, he was\ngetting on my nerves.",0, 1, 15},
+                {"Let me guess, you're another thorn\nin my side, huh?",0, 5, 15},
+                {". . .",1, 15, 11},
+                {"...You took the words straight\nfrom my mouth...",1, 15, 11},
+                {"I had finally escaped that wretched\ngame, and of course YOU\nare here to greet me...",1, 15, 11},
+                {"...No matter...",1, 15, 11},
+                {"...I'll just kill you and finally get\nmy revenge... It's really that simple...",1, 15, 11},
+                {"...You don't mind your body being\ndissipated, right? It's only fair...",1, 15, 11},
+                {"You took the words straight from my mouth.",0, 3, 15},
             };
 
             static const struct
@@ -3531,13 +3619,13 @@ void Stage_Tick(void)
                 const char *text;
                 u8 camera;
             }latedrivedia[] = {
-                {"Huh?",1},
-                {"Where are we?",1},
-                {"Beep?",0},
-                {"That much is obvious.",1},
-                {"It seems that we are stuck in some sort of\nalternate reality...",1},
-                {"Eep skee dah?",0},
-                {"Since we're here anyway, I suppose one song\ncouldn't hurt.",1},
+                {"Huh?",0},
+                {"Where are we?",0},
+                {"Beep?",1},
+                {"That much is obvious.",0},
+                {"It seems that we are stuck in some sort of\nalternate reality...",0},
+                {"Eep skee dah?",1},
+                {"Since we're here anyway, I suppose one song\ncouldn't hurt.",0},
             };
             static const struct
             {
@@ -3547,14 +3635,14 @@ void Stage_Tick(void)
                 int port2;
                 int diaboxes;
             }flopdia[] = {
-                {"Meow!",1, 13, 15, 0},
-                {"Beep.",0, 15, 6, 0},
-                {"HISSS",1, 14, 15, 1},
-                {"Bep bee aa skoo dep?",0, 15, 12, 0},
-                {"Meow Meow",1, 13, 15, 0},
-                {"Hiss",1, 14, 15, 1},
-                {"Beep bop!",0, 15, 6, 0},
-                {"HISSSS!!",1, 14, 15, 1},
+                {"Meow!",0, 13, 15, 0},
+                {"Beep.",1, 15, 6, 0},
+                {"HISSS",0, 14, 15, 1},
+                {"Bep bee aa skoo dep?",1, 15, 12, 0},
+                {"Meow Meow",0, 13, 15, 0},
+                {"Hiss",0, 14, 15, 1},
+                {"Beep bop!",1, 15, 6, 0},
+                {"HISSSS!!",0, 14, 15, 1},
             };
 
             //Clear per-frame flags
@@ -3601,7 +3689,46 @@ void Stage_Tick(void)
                     }
 
                     //camera shit
-                    if (psydia[stage.delect].camera == 1)
+                    if (psydia[stage.delect].camera == 0)
+                        Stage_FocusCharacter(stage.opponent, FIXED_UNIT / 24);
+                    else
+                        Stage_FocusCharacter(stage.player, FIXED_UNIT / 24);
+                        
+                    break;
+                }
+                case StageId_2_1:
+                {
+                    //Animatable_Animate(&this->psytalk_animatable, (void*)this, PsyTalk_SetFrame);
+		    
+                    stage.font_arial.draw_col(&stage.font_arial,
+                        psydia[stage.delect].text,
+                        50,
+                        180,
+                        FontAlign_Left,
+                        0 >> 1,
+                        0 >> 1,
+                        0 >> 1
+                    );
+                    Stage_DrawDiaPorts(psydia[stage.delect].port1, 70, 97);
+                    Stage_DrawDiaPorts(psydia[stage.delect].port2, 180, 94);
+                    
+                    if(psydia[stage.delect].diaboxes==0)
+                    {
+                    diabox=0;
+                    }
+                    else
+                    {
+                    diabox=1;
+                    }
+                    if (stage.delect == 9)
+                    {
+                        Audio_StopXA();
+                        Stage_LoadStage();
+                        stage.state = StageState_Play;
+                    }
+
+                    //camera shit
+                    if (psydia[stage.delect].camera == 0)
                         Stage_FocusCharacter(stage.opponent, FIXED_UNIT / 24);
                     else
                         Stage_FocusCharacter(stage.player, FIXED_UNIT / 24);
@@ -3637,7 +3764,7 @@ void Stage_Tick(void)
                         stage.state = StageState_Play;
                     }
 
-                    if (wiltdia[stage.delect].camera == 1)
+                    if (wiltdia[stage.delect].camera == 0)
                         Stage_FocusCharacter(stage.opponent, FIXED_UNIT / 24);
                     else
                         Stage_FocusCharacter(stage.player, FIXED_UNIT / 24);
@@ -3666,7 +3793,7 @@ void Stage_Tick(void)
                         //Stage_LoadStage();
                         stage.state = StageState_Play;
                     }
-                    if (uproardia[stage.delect].camera == 1)
+                    if (uproardia[stage.delect].camera == 0)
                         Stage_FocusCharacter(stage.opponent, FIXED_UNIT / 24);
                     else
                         Stage_FocusCharacter(stage.player, FIXED_UNIT / 24);
@@ -3692,7 +3819,7 @@ void Stage_Tick(void)
                         stage.state = StageState_Play;
                     }
 
-                    if (latedrivedia[stage.delect].camera == 1)
+                    if (latedrivedia[stage.delect].camera == 0)
                         Stage_FocusCharacter(stage.opponent, FIXED_UNIT / 24);
                     else
                         Stage_FocusCharacter(stage.player, FIXED_UNIT / 24);
@@ -3729,7 +3856,7 @@ void Stage_Tick(void)
                     }
 
                     //camera shit
-                    if (flopdia[stage.delect].camera == 1)
+                    if (flopdia[stage.delect].camera == 0)
                         Stage_FocusCharacter(stage.opponent, FIXED_UNIT / 24);
                     else
                         Stage_FocusCharacter(stage.player, FIXED_UNIT / 24);

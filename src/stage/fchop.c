@@ -239,7 +239,6 @@ void Back_FChop_DrawBG(StageBack *back)
 	
 			Stage_DrawTex(&this->tex_fireplace, &fireplace_src, &fireplace_dst, stage.camera.bzoom);
 			Stage_DrawTex(&this->tex_junk, &table_src, &table_dst, stage.camera.bzoom);
-			Stage_DrawTex(&this->tex_junk, &chair_src, &chair_dst, stage.camera.bzoom);
 			Stage_DrawTex(&this->tex_floor, &floorl_src, &floorl_dst, stage.camera.bzoom);
 			Stage_DrawTex(&this->tex_floor, &floorr_src, &floorr_dst, stage.camera.bzoom);
 			Stage_DrawTex(&this->tex_back0, &halll_src, &halll_dst, stage.camera.bzoom);

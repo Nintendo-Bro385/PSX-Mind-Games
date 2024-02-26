@@ -39,6 +39,7 @@ SRCS = src/main.c \
        src/character/psychic.c \
        src/character/senpaib.c \
        src/character/bfspirit.c \
+       src/character/flopchic.c \
        src/character/bft.c \
        src/character/sendai.c \
        src/character/titlepsy.c \

@@ -121,7 +121,7 @@
 		{FIXED_DEC(15,10),FIXED_DEC(2,1),FIXED_DEC(25,10)},
 		2, 1,
 		XA_Psychico, 0,
-		0,
+		1,
 		XA_Psy, 0,
 		
 		StageId_2_2, STAGE_LOAD_FLAG | STAGE_LOAD_STAGE
@@ -147,8 +147,8 @@
 	{ //StageId_2_3 (Monster)
 		//Characters
 		{Char_BF_New,      FIXED_DEC(225,1),  FIXED_DEC(138,1)},
-		{Char_OldPsychic_New,  FIXED_DEC(16,1),  FIXED_DEC(118,1)},
-		{NULL},
+		{Char_Flopchic_New,  FIXED_DEC(16-10,1),  FIXED_DEC(118+46,1)},
+		{Char_OldPsychic_New,  FIXED_DEC(16-100,1),  FIXED_DEC(118+20,1)},
 		
 		//Stage background
 		Back_FChop_New,

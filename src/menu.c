@@ -52,6 +52,8 @@ const char *dsut = "??????";
 const char *udmt = "??????";
 const char *bdwt = "??????";
 const char *fgt = "??????";
+const char *swapt = "??????";
+const char *twot = "??????";
 const char *debugt = "??????";
 int wicon =10;
 int mpicon =10;
@@ -61,6 +63,8 @@ int duicon =10;
 int udicon =10;
 int bdwicon =10;
 int fgicon =10;
+int swapicon =10;
+int twoicon =10;
 int dbicon =10;
 boolean nomem;
 boolean up;
@@ -958,6 +962,10 @@ void Menu_Tick(void)
     					stage.prefs.bdweek_awards =true;
 
     					stage.prefs.flopg_awards =true;
+    					
+    					stage.prefs.swap_awards =true;
+    					
+    					stage.prefs.two_awards =true;
     				 	
     				 	stage.prefs.debugger_awards =true;
 		        	}
@@ -1193,11 +1201,33 @@ void Menu_Tick(void)
                 fgicon=10; 
                 fgt="?";
             }
+            if (stage.prefs.swap_awards == true)
+            {
+                swapicon=6; 
+                swapt="Played as psychic";
+            }
+
+    	 	else
+            {
+                swapicon=10; 
+                swapt="?";
+            }
+            if (stage.prefs.two_awards == true)
+            {
+                twoicon=7; 
+                twot="You have friends!!";
+            }
+
+    	 	else
+            {
+                twoicon=10; 
+                twot="?";
+            }
     	 	
     	 	if (stage.prefs.debugger_awards == true)
             {
                 dbicon=19; 
-                debugt="Compiling the port";
+                debugt="The 2nd controller";
             }
 
     	 	else
@@ -1313,7 +1343,7 @@ void Menu_Tick(void)
                     menu.next_page = MenuPage_Title;
                     Trans_Start();
                 }
-                if (pad_state.press & PAD_TRIANGLE)
+                if (pad_state_2.press & PAD_TRIANGLE)
                 {
                     menu.next_page = MenuPage_Debug;
                     menu.next_select = 0;
@@ -1876,10 +1906,12 @@ void Menu_Tick(void)
                 {mpicon, 2,nmpt},
                 {mwticon, 3,nmwilt},
                 {muicon, 4,nmut},
-                {duicon, 5,dsut},
                 {udicon, 6,udmt},
                 {bdwicon, 1,bdwt},
                 {fgicon, 7,fgt},
+                {duicon, 5,dsut},
+                {swapicon, 9,swapt},
+                {twoicon, 10,twot},
                 {dbicon, 8,debugt},
             };
             
@@ -1992,6 +2024,28 @@ void Menu_Tick(void)
 		    	//Draw page label
 			    menu.font_arial.draw(&menu.font_arial,
 				"Debugger enter the debug menu",
+				16,
+				217,
+				FontAlign_Left
+			    );
+			    break;
+            		}
+            		case 9:
+		    	{
+		    	//Draw page label
+			    menu.font_arial.draw(&menu.font_arial,
+				"Pink psychic? Play swapped mode",
+				16,
+				217,
+				FontAlign_Left
+			    );
+			    break;
+            		}
+            		case 10:
+		    	{
+		    	//Draw page label
+			    menu.font_arial.draw(&menu.font_arial,
+				"Play with a friend",
 				16,
 				217,
 				FontAlign_Left
@@ -2143,24 +2197,24 @@ void Menu_Tick(void)
             	{"Leomming", 4, 28, 0xFFeb8077},
             	{"PJsVoiceArts", 5, 29, 0xFFea384b},
             	{"Iymph", 6, 30, 0xFF5f5e5f},
-            	{" ", 0, 6, 0xFF5f5e5f},
-            	{" ", 0, 6, 0xFF32ebed},
+            	{" ", 0, 8, 0xFF5f5e5f},
+            	{" ", 0, 8, 0xFF32ebed},
             	{"Salvati", 7, 31, 0xFF32ebed},
             	{"slabraccoon", 8, 32, 0xFFaf4c22},
-            	{" ", 0, 6, 0xFFaf4c22},
-            	{" ", 0, 6, 0xFF51ffb3},
+            	{" ", 0, 8, 0xFFaf4c22},
+            	{" ", 0, 8, 0xFF51ffb3},
                 {"nintendo bro", 9, 20, 0xFF51ffb3},
                 {"biliousdata", 10, 22, 0xFF1b16af},
                 {"mrrumbleroses", 11, 24, 0xFF126000},
                 {"unstop4ble", 12, 23, 0xFF639bff},
                 {"igorsou3000", 13, 33, 0xFFfb6c23},
                 {"spicyjpeg", 14, 35, 0xFFfb6c23},
-                {" ", 0, 6, 0xFFffe400},
-                {" ", 0, 6, 0xFF51ffb3},
+                {" ", 0, 8, 0xFFffe400},
+                {" ", 0, 8, 0xFF51ffb3},
                 {"nintendo bro", 15, 20, 0xFF51ffb3},
                 {"igorsou3000", 16, 33, 0xFFfb6c23},
-                {" ", 0, 6, 0xFFfb6c23},
-                {" ", 0, 6, 0xFFfb6c23},
+                {" ", 0, 8, 0xFFfb6c23},
+                {" ", 0, 8, 0xFFfb6c23},
                 {"ckdev" , 17, 21,0xFFc5f05f},
             };
             switch (menu_options[menu.select].about)

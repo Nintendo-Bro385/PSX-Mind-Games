@@ -4,7 +4,9 @@ Achievements list
 3: No miss psychic
 4: No miss wilter
 5: No miss uproar
-6: 3ds user? turn on low quality mode
-7: Unlock the mind games demo
-8: ??????
-9: Debugger enter the debug menu
+6: Unlock the mind games demo
+7: ??????
+8: 3ds user? turn on low quality mode
+9: Pink psychic? Play swapped mode
+10: Play with a friend
+11: Debugger enter the debug menu

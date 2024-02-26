@@ -579,8 +579,15 @@ void Back_Chop_DrawBG(StageBack *back)
 void Back_Chop_DrawRed(StageBack *back)
 {
 	Back_Chop *this = (Back_Chop*)back;
-
-	if (stage.stage_id == StageId_1_2)
+	
+		if (stage.stage_id == StageId_1_6)
+	{
+			
+			Gfx_BlendRect(&wholescreen, 253, 27, 49,255);//253,27,49
+			
+			}
+	
+	if (stage.stage_id == (StageId_1_2 || StageId_1_6))
 	{
 		if (fadered > 0 && redmode == 0)
 		{

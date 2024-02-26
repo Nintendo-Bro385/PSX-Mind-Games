@@ -28,6 +28,7 @@ all: \
 	iso/senpaib/dead.arc \
 	iso/bfspirit/main.arc \
 	iso/bfspirit/dead.arc \
+	iso/flopchic/main.arc \
 	iso/titlepsy/main.arc \
 	iso/titlegf/main.arc \
 	iso/menu/characters/mbf.arc \
@@ -84,6 +85,9 @@ iso/senpaib/dead.arc: iso/senpaib/dead1.tim iso/senpaib/dead2.tim
 iso/bfspirit/main.arc: iso/bfspirit/idle0.tim iso/bfspirit/idle1.tim iso/bfspirit/idle2.tim iso/bfspirit/idle3.tim iso/bfspirit/left0.tim iso/bfspirit/left1.tim iso/bfspirit/left2.tim iso/bfspirit/left3.tim iso/bfspirit/down0.tim iso/bfspirit/down1.tim iso/bfspirit/up0.tim iso/bfspirit/up1.tim iso/bfspirit/right0.tim iso/bfspirit/right1.tim iso/bfspirit/miss0.tim iso/bfspirit/miss1.tim iso/bfspirit/miss2.tim iso/bfspirit/miss3.tim iso/bfspirit/dead0.tim iso/bfspirit/leftalt0.tim iso/bfspirit/leftalt1.tim iso/bfspirit/downalt.tim iso/bfspirit/upalt.tim iso/bfspirit/rightalt.tim
 
 iso/bfspirit/dead.arc: iso/bfspirit/dead1.tim iso/bfspirit/dead2.tim iso/bfspirit/retry.tim
+
+# Flopchic
+iso/flopchic/main.arc: iso/flopchic/idle0.tim iso/flopchic/idle1.tim iso/flopchic/left0.tim iso/flopchic/down0.tim iso/flopchic/up0.tim iso/flopchic/right0.tim
 
 # Titlepsy
 iso/titlepsy/main.arc: iso/titlepsy/idle0.tim iso/titlepsy/idle1.tim iso/titlepsy/idle2.tim iso/titlepsy/idle3.tim iso/titlepsy/idle4.tim iso/titlepsy/idle5.tim 
