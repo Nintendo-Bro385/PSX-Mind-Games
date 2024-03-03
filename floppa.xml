@@ -110,6 +110,14 @@
 				<file name = "space.arc" type = "data" source = "iso/spacec/back.arc"/>
 			</dir>
 			
+			<!-- Character Portrait assets -->
+			<dir name = "portrait">
+				<!-- Boyfriend assets -->
+				<file name = "bf.arc" type = "data" source = "iso/stage/portraits/bf.arc"/>
+				<!-- Psychic assets -->
+				<file name = "psychic.arc" type = "data" source = "iso/stage/portraits/psychic.arc"/>
+			</dir>
+			
 			<!-- Character assets -->
 			<dir name = "char">
 				<!-- Boyfriend assets -->

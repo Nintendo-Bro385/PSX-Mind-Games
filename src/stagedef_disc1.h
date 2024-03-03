@@ -13,6 +13,7 @@
 		XA_Psychic, 0,
 		1, //dialogue check
 		XA_Psy, 0, //dialogue song and it's channel
+		{"\\PORTRAIT\\BF.ARC;1", "\\PORTRAIT\\PSYCHIC.ARC;1"},
 		
 		StageId_1_5, STAGE_LOAD_FLAG || STAGE_LOAD_PLAYER || STAGE_LOAD_OPPONENT
 	},
@@ -31,6 +32,7 @@
 		XA_Wilter, 2,
 		1, //dialogue check
 		XA_Loveisaflower, 1,
+		{"\\PORTRAIT\\BF.ARC;1", "\\PORTRAIT\\PSYCHIC.ARC;1"},
 		
 		StageId_1_6, STAGE_LOAD_FLAG | STAGE_LOAD_PLAYER | STAGE_LOAD_STAGE
 	},
@@ -49,6 +51,7 @@
 		XA_Uproar, 0,
 		1, //dialogue check
 		XA_Spiritualunrest, 2,
+		{"\\PORTRAIT\\BF.ARC;1", "\\PORTRAIT\\PSYCHIC.ARC;1"},
 		
 		StageId_1_3, 0
 	},
@@ -67,6 +70,7 @@
 		XA_Ludum, 2,
 		0,
 		XA_Clucked, 2,
+		{NULL, NULL},
 		
 		StageId_1_4, 0
 	},
@@ -86,6 +90,7 @@
 		XA_BFtransform, 0,
 		0,
 		XA_Clucked, 2,
+		{NULL, NULL},
 		
 		StageId_1_2, STAGE_LOAD_FLAG || STAGE_LOAD_PLAYER || STAGE_LOAD_OPPONENT
 	},
@@ -105,6 +110,7 @@
 		XA_Sendai, 1,
 		0,
 		XA_Clucked, 2,
+		{NULL, NULL},
 		
 		StageId_1_3, 0
 	},
@@ -123,6 +129,7 @@
 		XA_Psychico, 0,
 		1,
 		XA_Psy, 0,
+		{"\\PORTRAIT\\BF.ARC;1", "\\PORTRAIT\\PSYCHIC.ARC;1"},
 		
 		StageId_2_2, STAGE_LOAD_FLAG | STAGE_LOAD_STAGE
 	},
@@ -141,6 +148,7 @@
 		XA_Latedrive, 2,
 		1,
 		XA_Itwillbeokay, 3,
+		{"\\PORTRAIT\\BF.ARC;1", "\\PORTRAIT\\PSYCHIC.ARC;1"},
 		
 		StageId_2_2, 0
 	},
@@ -159,6 +167,7 @@
 		XA_Flopchic, 0,
 		1,
 		XA_Psy, 0,
+		{NULL, NULL},
 		
 		StageId_2_3, 0
 	},
@@ -178,6 +187,7 @@
 		XA_Flopchic, 0,
 		0,
 		XA_Clucked, 2,
+		{NULL, NULL},
 		
 		StageId_3_2, STAGE_LOAD_FLAG
 	},
@@ -196,6 +206,7 @@
 		XA_Philly, 2,
 		0,
 		XA_Clucked, 2,
+		{NULL, NULL},
 		
 		StageId_3_2, 0
 	},
@@ -214,6 +225,7 @@
 		XA_Clucked, 2,
 		0,
 		XA_Clucked, 2,
+		{NULL, NULL},
 		
 		StageId_2_4, 0
 	},

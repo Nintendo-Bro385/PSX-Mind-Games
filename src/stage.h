@@ -94,6 +94,15 @@ typedef struct StageBack
 	void (*free)(struct StageBack*);
 } StageBack;
 
+// Dialogue Struct
+typedef struct
+{
+	const char *text; //The text that is displayed
+    u8 camera; //Who the camera is pointing at, 0 for bf, 1 for dad
+    u8 portrait;
+	int diaboxes;
+} Dialogue_Struct;
+
 //Stage definitions
 typedef struct
 {
@@ -114,6 +123,7 @@ typedef struct
 	u8 music_track, music_channel;
 	u8 dialogue;
 	u8 diasong, dia_channel;
+	const char* portrait_path[2];
 	
 	StageId next_stage;
 	u8 next_load;
@@ -281,6 +291,16 @@ typedef struct
 	
 	//Object lists
 	ObjectList objlist_splash, objlist_fg, objlist_bg;
+	
+	//Portrait data
+	struct
+	{
+		int current, next;
+		u8 tex_id;
+		Gfx_Tex tex;
+		IO_Data data[2];
+	} portrait;
+	
 } Stage;
 
 extern Stage stage;

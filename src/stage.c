@@ -21,6 +21,7 @@
 #include "trans.h"
 #include "loadscr.h"
 #include "str.h"
+#include "archive.h"
 
 #include "object/combo.h"
 #include "object/splash.h"
@@ -49,6 +50,45 @@ boolean win;
 
 //#define STAGE_FREECAM //Freecam
 int stopdownscroll;
+
+//Dialogue character portraits
+enum 
+{
+	Dialogue_BF_Normal,
+	Dialogue_BF_Confused,
+	Dialogue_Psychic_Normal,
+	Dialogue_Psychic_Confused,
+	Dialogue_Psychic_Excited,
+	Dialogue_Psychic_Shock,
+	Dialogue_Psychic_Unamused,
+	Dialogue_Psychic_Annoyed,
+	
+	Dialogue_Max,
+};
+
+static const char** portrait_tims = (const char *[]){
+	"bf.tim",
+	"psychic0.tim",
+	"psychic1.tim",
+	NULL,
+};
+
+static const struct
+{
+	u8 tex;
+	RECT src;
+	POINT pos; //Position
+} portraits[] = {
+	{0, {  0,   0, 101, 102}, {65, 40}}, //BF normal
+	{0, {102,   0,  99, 102}, {65, 40}}, //BF confused
+	{1, {  0,   0, 129, 112}, {64, 56}}, //Psychic normal
+	{1, {130,   0, 117, 115}, {64, 56}}, //Psychic confused
+	{1, {  0, 113, 128, 117}, {64, 56}}, //Psychic excited
+	{1, {128, 115, 126, 122}, {64, 56}}, //Psychic shock
+	{2, {  0,   0, 128, 112}, {64, 56}}, //Psychic unamused
+	{2, {129,   0, 107, 104}, {64, 56}}, //Psychic annoyed
+};
+
 //welcome to the shitshow
 int note_x[8] = {
     //BF
@@ -1134,29 +1174,7 @@ void Stage_DrawBox()
 
     Stage_DrawTex(&stage.tex_dia, &dia_src, &dia_dst, stage.bump);
 }
-static void Stage_DrawDiaPorts(u8 i, s16 x, s16 y)
-{
-    //Port Size
-    u8 port_size = 64;
 
-    //Get src and dst
-    RECT Port_src = {
-        (i % 4) * port_size,
-        (i / 4) * port_size,
-        port_size,
-        port_size
-    };
-    RECT Port_dst = {
-        x,
-        y,
-        64,
-        64
-    };
-    //Port_dst.w = Port_dst.w * 2;
-    //Port_dst.h = Port_dst.h * 2;
-    //Draw dia port
-    Gfx_DrawTex(&stage.tex_hud2, &Port_src, &Port_dst);
-}
 //Stage loads
 static void Stage_SwapChars(void)
 {
@@ -2057,11 +2075,26 @@ static boolean Stage_NextLoad(void)
 //load dialogue related files
 void Stage_LoadDia(void)
 {
+	for (u8 i = 0; i < COUNT_OF(stage.portrait.data); i++)
+		stage.portrait.data[i] = IO_Read(stage.stage_def->portrait_path[i]);
+	
     Gfx_LoadTex(&stage.tex_dia, IO_Read("\\STAGE\\DIA.TIM;1"), GFX_LOADTEX_FREE);
-    Gfx_LoadTex(&stage.tex_hud2, IO_Read("\\STAGE\\HUD2.TIM;1"), GFX_LOADTEX_FREE);
+	
+	stage.portrait.current = stage.portrait.next = 0xFF;
+	stage.portrait.tex_id = 0xFF;
     
     FontData_Load(&stage.font_arial, Font_Arial);
+}
 
+//Unload dialogue related files
+void Stage_UnLoadDia(void)
+{
+	for (u8 i = 0; i < COUNT_OF(stage.portrait.data); i++)
+	{
+		//Free portrait art
+		Mem_Free(stage.portrait.data[i]);
+		stage.portrait.data[i] = NULL;
+	}
 }
 void Stage_Tick(void)
 {
@@ -3536,88 +3569,60 @@ void Stage_Tick(void)
 
             RECT dia2_src = {0, 112, 240, 63};
             RECT_FIXED dia2_dst = {FIXED_DEC(-150,1), FIXED_DEC(30,1), FIXED_DEC(297,1), FIXED_DEC(76,1)};
-            
+			
+			static Dialogue_Struct* dialoguep;
 
-            //???
-            Stage *this = (Stage*)this;
-
-            static const struct
-            {
-                const char *text; //The text that is displayed
-                u8 camera; //Who the camera is pointing at, 0 for bf, 1 for dad
-                int port1;//opponent
-                int port2;//player#
-                int diaboxes;
-            }psydia[] = {
-                {"What brings you here so late at night?",0, 0, 15, 0},
-                {"Beep.",1, 15, 6, 0},
-                {"Drop the act already.",0, 3, 15, 1},
-                {"I could feel your malicious intent the\nmoment you set foot in here.",0, 0, 15, 0},
-                {"Bep bee aa skoo dep?",1, 15, 12, 0},
-                {"I wouldn't try the door if I were you.",0, 4, 15, 0},
-                {"Now...",0, 2, 15, 0},
-                {"I have a couple of questions to ask you...",0, 0, 15, 0},
-                {"And you WILL answer them.",0, 3, 15, 0},
-            };
-            
-
-            static const struct
-            {
-                const char *text;
-                u8 camera;
-                int port1;
-                int port2;
-                int diaboxes;
-            }wiltdia[] = {
-                {"Welp, you got me!",1, 15, 7, 0},
-                {"You're very clever, I'll give you that much.",1, 15, 7, 0},
-                {"No ordinary person would have seen\nthrough my facade.",1, 15, 7, 0},
-                {"Yeah, um...",0, 5, 15, 0},
-                {"...Who are you again?",0, 4, 15, 0},
-                {"Kh...!",1, 15, 8, 0},
-                {"You don't even remember me?!",1, 15, 8, 0},
-                {"Not in the slightest.",0, 2, 15, 0},
-                {"Seriously?! W-Whatever!",1, 15, 9, 1},
-                {"Now listen here!",1, 15, 9, 0},
-                {"I've taken this body hostage, so\ndon't even try anything!",1, 15, 9, 0},
-                {"Summon Daddy Dearest here this instant,\nor else he gets it!",1, 15, 9, 0},
-                {"...Daddy Dearest, huh..?",0, 2, 15, 0},
-                {"I don't know what your deal is, but...",0, 5, 15, 0},
-                {"I don't take commands from freaks of\nnature like you.",0, 3, 15, 0},
-                {"What did you just call me?!",1, 15, 10, 1},
+            static Dialogue_Struct psydia[] = {
+                {"What brings you here so late at night?", 1, Dialogue_Psychic_Normal, 0},
+                {"Beep.", 0, Dialogue_BF_Normal, 0},
+                {"Drop the act already.", 1, Dialogue_Psychic_Excited, 1},
+                {"I could feel your malicious intent the\nmoment you set foot in here.", 1, Dialogue_Psychic_Normal, 0},
+                {"Bep bee aa skoo dep?", 0, Dialogue_BF_Confused, 0},
+                {"I wouldn't try the door if I were you.", 1, Dialogue_Psychic_Shock, 0},
+                {"Now...", 1, Dialogue_Psychic_Confused, 0},
+                {"I have a couple of questions to ask you...", 1, Dialogue_Psychic_Normal, 0},
+                {"And you WILL answer them.", 1, Dialogue_Psychic_Excited, 0},
             };
 
-            static const struct
-            {
-                const char *text;
-                u8 camera;
-                int port1;
-                int port2;
-            }uproardia[] = {
-            
-                {"At least that guy's gone, he was\ngetting on my nerves.",0, 1, 15},
-                {"Let me guess, you're another thorn\nin my side, huh?",0, 5, 15},
-                {". . .",1, 15, 11},
-                {"...You took the words straight\nfrom my mouth...",1, 15, 11},
-                {"I had finally escaped that wretched\ngame, and of course YOU\nare here to greet me...",1, 15, 11},
-                {"...No matter...",1, 15, 11},
-                {"...I'll just kill you and finally get\nmy revenge... It's really that simple...",1, 15, 11},
-                {"...You don't mind your body being\ndissipated, right? It's only fair...",1, 15, 11},
-                {"You took the words straight from my mouth.",0, 3, 15},
+            static Dialogue_Struct wiltdia[] = {
+                {"Welp, you got me!", 0, Dialogue_BF_Normal, 0},
+                {"You're very clever, I'll give you that much.", 0, Dialogue_BF_Normal, 0},
+                {"No ordinary person would have seen\nthrough my facade.", 0, Dialogue_BF_Normal, 0},
+                {"Yeah, um...", 1, Dialogue_Psychic_Unamused, 0},
+                {"...Who are you again?", 1, Dialogue_Psychic_Shock, 0},
+                {"Kh...!", 0, Dialogue_BF_Normal, 1},
+                {"You don't even remember me?!", 0, Dialogue_BF_Normal, 0},
+                {"Not in the slightest.", 1, Dialogue_Psychic_Confused, 0},
+                {"Seriously?! W-Whatever!", 0, Dialogue_BF_Normal, 1},
+                {"Now listen here!", 0, Dialogue_BF_Normal, 0},
+                {"I've taken this body hostage, so\ndon't even try anything!", 0, Dialogue_BF_Normal, 0},
+                {"Summon Daddy Dearest here this instant,\nor else he gets it!",0, Dialogue_BF_Normal, 0},
+                {"...Daddy Dearest, huh..?", 1, Dialogue_Psychic_Confused, 0},
+                {"I don't know what your deal is, but...", 1, Dialogue_Psychic_Unamused, 0},
+                {"I don't take commands from freaks of\nnature like you.", 1, Dialogue_Psychic_Excited, 0},
+                {"What did you just call me?!", 0, Dialogue_BF_Normal, 1},
             };
 
-            static const struct
-            {
-                const char *text;
-                u8 camera;
-            }latedrivedia[] = {
-                {"Huh?",0},
-                {"Where are we?",0},
-                {"Beep?",1},
-                {"That much is obvious.",0},
-                {"It seems that we are stuck in some sort of\nalternate reality...",0},
-                {"Eep skee dah?",1},
-                {"Since we're here anyway, I suppose one song\ncouldn't hurt.",0},
+            static Dialogue_Struct uproardia[] = {
+                {"At least that guy's gone, he was\ngetting on my nerves.", 1, Dialogue_Psychic_Annoyed, 0},
+                {"Let me guess, you're another thorn\nin my side, huh?", 1, Dialogue_Psychic_Unamused, 0},
+                {". . .", 0, Dialogue_BF_Normal, 0},
+                {"...You took the words straight\nfrom my mouth...", 0, Dialogue_BF_Normal, 0},
+                {"I had finally escaped that wretched\ngame, and of course YOU\nare here to greet me...", 0, Dialogue_BF_Normal, 0},
+                {"...No matter...", 0, Dialogue_BF_Normal, 0},
+                {"...I'll just kill you and finally get\nmy revenge... It's really that simple...", 0, Dialogue_BF_Normal, 0},
+                {"...You don't mind your body being\ndissipated, right? It's only fair...", 0, Dialogue_BF_Normal, 0},
+                {"You took the words straight from my mouth.", 1, Dialogue_Psychic_Excited, 0},
+            };
+
+            static Dialogue_Struct latedrivedia[] = {
+                {"Huh?", 1, Dialogue_Psychic_Normal, 0},
+                {"Where are we?", 1, Dialogue_Psychic_Normal, 0},
+                {"Beep?", 0, Dialogue_BF_Confused, 0},
+                {"That much is obvious.", 1, Dialogue_Psychic_Unamused, 0},
+                {"It seems that we are stuck in some sort of\nalternate reality...", 1, Dialogue_Psychic_Confused, 0},
+                {"Eep skee dah?", 0, Dialogue_BF_Normal, 0},
+                {"Since we're here anyway, I suppose one song\ncouldn't hurt.", 1, Dialogue_Psychic_Normal, 0},
             };
             static const struct
             {
@@ -3645,233 +3650,98 @@ void Stage_Tick(void)
             {
                 Audio_PlayXA_Track(stage.stage_def->diasong, 0x40, stage.stage_def->dia_channel, true); //read stagedef and play song
             }
+			
+			u16 dialogue_final = 0;
+			
+			switch (stage.stage_id)
+			{
+				case StageId_1_2:
+					dialoguep = wiltdia;
+					dialogue_final = COUNT_OF(wiltdia);
+				break;
+				case StageId_1_3:
+					dialoguep = uproardia;
+					dialogue_final = COUNT_OF(uproardia);
+				break;
+				case StageId_2_2:
+					dialoguep = latedrivedia;
+					dialogue_final = COUNT_OF(latedrivedia);
+				break;
+				default:
+					dialoguep = psydia;
+					dialogue_final = COUNT_OF(psydia);
+				break;
+			}
+			
+			stage.portrait.next = dialoguep[stage.delect].portrait;
+			
+			if (stage.delect == dialogue_final)
+			{
+				Audio_StopXA();
+				Stage_LoadStage();
+				stage.state = StageState_Play;
+				Stage_UnLoadDia();
+			}
+			else
+			{
+				//text drawing shit
+				stage.font_arial.draw_col(&stage.font_arial,
+					dialoguep[stage.delect].text,
+					50,
+					180,
+					FontAlign_Left,
+					0 >> 1,
+					0 >> 1,
+					0 >> 1
+				);
+				
+				if (stage.portrait.current != stage.portrait.next && stage.delect < dialogue_final)
+				{
+					//Update the current portrait
+					stage.portrait.current = stage.portrait.next;
+					
+					//Change the texture when needed
+					if (stage.portrait.tex_id !=  portraits[stage.portrait.current].tex)
+					{
+						stage.portrait.tex_id = portraits[stage.portrait.current].tex;
+						Gfx_LoadTex(&stage.portrait.tex, Archive_Find(stage.portrait.data[dialoguep[stage.delect].camera], portrait_tims[stage.portrait.tex_id]), 0);
+					}
+				}
+				
+				diabox = (dialoguep[stage.delect].diaboxes != 0);
 
-            //text drawing shit
-            switch (stage.stage_id)
-            {
-                case StageId_1_1:
-                {
-                    //Animatable_Animate(&this->psytalk_animatable, (void*)this, PsyTalk_SetFrame);
-		    
-                    stage.font_arial.draw_col(&stage.font_arial,
-                        psydia[stage.delect].text,
-                        50,
-                        180,
-                        FontAlign_Left,
-                        0 >> 1,
-                        0 >> 1,
-                        0 >> 1
-                    );
-                    Stage_DrawDiaPorts(psydia[stage.delect].port1, 70, 97);
-                    Stage_DrawDiaPorts(psydia[stage.delect].port2, 180, 94);
-                    
-                    if(psydia[stage.delect].diaboxes==0)
-                    {
-                    diabox=0;
-                    }
-                    else
-                    {
-                    diabox=1;
-                    }
-                    if (stage.delect == 9)
-                    {
-                        Audio_StopXA();
-                        Stage_LoadStage();
-                        stage.state = StageState_Play;
-                    }
-
-                    //camera shit
-                    if (psydia[stage.delect].camera == 0)
-                        Stage_FocusCharacter(stage.opponent, FIXED_UNIT / 24);
-                    else
-                        Stage_FocusCharacter(stage.player, FIXED_UNIT / 24);
-                        
-                    break;
-                }
-                case StageId_2_1:
-                {
-                    //Animatable_Animate(&this->psytalk_animatable, (void*)this, PsyTalk_SetFrame);
-		    
-                    stage.font_arial.draw_col(&stage.font_arial,
-                        psydia[stage.delect].text,
-                        50,
-                        180,
-                        FontAlign_Left,
-                        0 >> 1,
-                        0 >> 1,
-                        0 >> 1
-                    );
-                    Stage_DrawDiaPorts(psydia[stage.delect].port1, 70, 97);
-                    Stage_DrawDiaPorts(psydia[stage.delect].port2, 180, 94);
-                    
-                    if(psydia[stage.delect].diaboxes==0)
-                    {
-                    diabox=0;
-                    }
-                    else
-                    {
-                    diabox=1;
-                    }
-                    if (stage.delect == 9)
-                    {
-                        Audio_StopXA();
-                        Stage_LoadStage();
-                        stage.state = StageState_Play;
-                    }
-
-                    //camera shit
-                    if (psydia[stage.delect].camera == 0)
-                        Stage_FocusCharacter(stage.opponent, FIXED_UNIT / 24);
-                    else
-                        Stage_FocusCharacter(stage.player, FIXED_UNIT / 24);
-                        
-                    break;
-                }
-
-                case StageId_1_2:
-                {
-                    stage.font_arial.draw_col(&stage.font_arial,
-                        wiltdia[stage.delect].text,
-                        50,
-                        180,
-                        FontAlign_Left,
-                        0 >> 1,
-                        0 >> 1,
-                        0 >> 1
-                    );
-		    Stage_DrawDiaPorts(wiltdia[stage.delect].port1, 70, 97);
-                    Stage_DrawDiaPorts(wiltdia[stage.delect].port2, 180, 94);
-                    if(wiltdia[stage.delect].diaboxes==0)
-                    {
-                    diabox=0;
-                    }
-                    else
-                    {
-                    diabox=1;
-                    }
-                    if (stage.delect == 16)
-                    {
-                        Audio_StopXA();
-                        Stage_LoadStage();
-                        stage.state = StageState_Play;
-                    }
-
-                    if (wiltdia[stage.delect].camera == 0)
-                        Stage_FocusCharacter(stage.opponent, FIXED_UNIT / 24);
-                    else
-                        Stage_FocusCharacter(stage.player, FIXED_UNIT / 24);
-                    break;
-                }
-
-                case StageId_1_3:
-                {
-                    stage.font_arial.draw_col(&stage.font_arial,
-                        uproardia[stage.delect].text,
-                        50,
-                        180,
-                        FontAlign_Left,
-                        0 >> 1,
-                        0 >> 1,
-                        0 >> 1
-                    );
-                    Stage_DrawDiaPorts(uproardia[stage.delect].port1, 70, 97);
-                    Stage_DrawDiaPorts(uproardia[stage.delect].port2, 180, 94);
-                    
-                    diabox=0;
-                    
-                    if (stage.delect == 9)
-                    {
-                        Audio_StopXA();
-                        //Stage_LoadStage();
-                        stage.state = StageState_Play;
-                    }
-                    if (uproardia[stage.delect].camera == 0)
-                        Stage_FocusCharacter(stage.opponent, FIXED_UNIT / 24);
-                    else
-                        Stage_FocusCharacter(stage.player, FIXED_UNIT / 24);
-                    break;
-                }
-
-                case StageId_2_2:
-                {//sus
-                    stage.font_arial.draw_col(&stage.font_arial,
-                        latedrivedia[stage.delect].text,
-                        50,
-                        180,
-                        FontAlign_Left,
-                        0 >> 1,
-                        0 >> 1,
-                        0 >> 1
-                    );
-	            diabox=0;
-                    if (stage.delect == 7)
-                    {
-                        Audio_StopXA();
-                        Stage_LoadStage();
-                        stage.state = StageState_Play;
-                    }
-
-                    if (latedrivedia[stage.delect].camera == 0)
-                        Stage_FocusCharacter(stage.opponent, FIXED_UNIT / 24);
-                    else
-                        Stage_FocusCharacter(stage.player, FIXED_UNIT / 24);
-                    break;
-                }
-                case StageId_2_3:
-                {
-                    //Animatable_Animate(&this->psytalk_animatable, (void*)this, PsyTalk_SetFrame);
-
-                    stage.font_arial.draw_col(&stage.font_arial,
-                        flopdia[stage.delect].text,
-                        50,
-                        180,
-                        FontAlign_Left,
-                        0 >> 1,
-                        0 >> 1,
-                        0 >> 1
-                    );
-                    Stage_DrawDiaPorts(flopdia[stage.delect].port1, 70, 105);
-                    Stage_DrawDiaPorts(flopdia[stage.delect].port2, 180, 94);
-                    if(flopdia[stage.delect].diaboxes==0)
-                    {
-                    diabox=0;
-                    }
-                    else
-                    {
-                    diabox=1;
-                    }
-                    if (stage.delect == 8)
-                    {
-                        Audio_StopXA();
-                        Stage_LoadStage();
-                        stage.state = StageState_Play;
-                    }
-
-                    //camera shit
-                    if (flopdia[stage.delect].camera == 0)
-                        Stage_FocusCharacter(stage.opponent, FIXED_UNIT / 24);
-                    else
-                        Stage_FocusCharacter(stage.player, FIXED_UNIT / 24);
-                        
-                    break;
-                }
-
-                default:
-                    break;
-            }
-	    if(diabox==0)
-	    {
-            Stage_DrawTex(&stage.tex_dia, &dia_src, &dia_dst, stage.bump);
-            }
-            else
-            {
-            Stage_DrawTex(&stage.tex_dia, &dia2_src, &dia2_dst, stage.bump);
-            }
+				//camera shit
+				if (dialoguep[stage.delect].camera != 0)
+					Stage_FocusCharacter(stage.opponent, FIXED_UNIT / 24);
+				else
+					Stage_FocusCharacter(stage.player, FIXED_UNIT / 24);
+				
+				if(!diabox)
+				{
+					Stage_DrawTex(&stage.tex_dia, &dia_src, &dia_dst, stage.bump);
+				}
+				else
+				{
+					Stage_DrawTex(&stage.tex_dia, &dia2_src, &dia2_dst, stage.bump);
+				}
+				
+				int pos_x = (dialoguep[stage.delect].camera) ? SCREEN_WIDTH2 - 50 : SCREEN_WIDTH - 50;
+				int pos_y = SCREEN_HEIGHT2;
+				
+				//Draw Character portrait
+				RECT dst = {
+					pos_x - portraits[stage.portrait.current].pos.x, 
+					pos_y - portraits[stage.portrait.current].pos.y, 
+					portraits[stage.portrait.current].src.w, 
+					portraits[stage.portrait.current].src.h
+				};
+				
+				Gfx_DrawTex(&stage.portrait.tex, &portraits[stage.portrait.current].src, &dst);
+			}    
             
-            
-            static const RECT walterwhite = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+		static const RECT walterwhite = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
 
-            Gfx_BlendRect(&walterwhite, 255, 255, 255, 255);
+		Gfx_BlendRect(&walterwhite, 255, 255, 255, 255);
 
 
             //Draw stage foreground
@@ -3899,40 +3769,21 @@ void Stage_Tick(void)
             //Draw stage background
             if (stage.back->draw_bg != NULL)
                 stage.back->draw_bg(stage.back);
-
-            //skip dialogue
-            if (pad_state.press & PAD_START)
-            {
-            	if (stage.stage_id != StageId_1_3)
-            	{
-                Audio_StopXA();
-                Stage_LoadStage();
-                stage.state = StageState_Play;
-		        if (stage.stage_id == StageId_1_2)
-		        {
-		        stage.delect =16;
-		        }
-                }
-                else
-                {
-                Audio_StopXA();
-                stage.state = StageState_Play;
-                }
-            }
+   
             //progress to next message
             if (pad_state.press & PAD_CROSS)
             {
                 stage.delect++;
             }
+			
+			//skip dialogue
+            if (pad_state.press & PAD_START)
+            {
+				stage.delect = dialogue_final;
+            }
 
             Stage_ScrollCamera();
-
-
-
-
-
-
-            
+     
             break;
         }
         default:
