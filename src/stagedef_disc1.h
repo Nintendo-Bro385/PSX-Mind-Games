@@ -32,7 +32,7 @@
 		XA_Wilter, 2,
 		1, //dialogue check
 		XA_Loveisaflower, 1,
-		{"\\PORTRAIT\\BF.ARC;1", "\\PORTRAIT\\PSYCHIC.ARC;1"},
+		{"\\PORTRAIT\\SENPAI.ARC;1", "\\PORTRAIT\\PSYCHIC.ARC;1"},
 		
 		StageId_1_6, STAGE_LOAD_FLAG | STAGE_LOAD_PLAYER | STAGE_LOAD_STAGE
 	},
@@ -51,7 +51,7 @@
 		XA_Uproar, 0,
 		1, //dialogue check
 		XA_Spiritualunrest, 2,
-		{"\\PORTRAIT\\BF.ARC;1", "\\PORTRAIT\\PSYCHIC.ARC;1"},
+		{"\\PORTRAIT\\SPIRIT.ARC;1", "\\PORTRAIT\\PSYCHIC.ARC;1"},
 		
 		StageId_1_3, 0
 	},
@@ -167,7 +167,7 @@
 		XA_Flopchic, 0,
 		1,
 		XA_Psy, 0,
-		{NULL, NULL},
+		{"\\PORTRAIT\\BF.ARC;1", "\\PORTRAIT\\FLOPPA.ARC;1"},
 		
 		StageId_2_3, 0
 	},

@@ -56,12 +56,23 @@ enum
 {
 	Dialogue_BF_Normal,
 	Dialogue_BF_Confused,
+	
 	Dialogue_Psychic_Normal,
 	Dialogue_Psychic_Confused,
 	Dialogue_Psychic_Excited,
 	Dialogue_Psychic_Shock,
 	Dialogue_Psychic_Unamused,
 	Dialogue_Psychic_Annoyed,
+	
+	Dialogue_Senpai_Normal,
+	Dialogue_Senpai_Shock,
+	Dialogue_Senpai_Nervous,
+	Dialogue_Senpai_Pissed,
+	
+	Dialogue_Spirit_Normal,
+	
+	Dialogue_Floppa_Normal,
+	Dialogue_Floppa_Pissed,
 	
 	Dialogue_Max,
 };
@@ -70,6 +81,9 @@ static const char** portrait_tims = (const char *[]){
 	"bf.tim",
 	"psychic0.tim",
 	"psychic1.tim",
+	"senpai.tim",
+	"spirit.tim",
+	"floppa.tim",
 	NULL,
 };
 
@@ -79,14 +93,21 @@ static const struct
 	RECT src;
 	POINT pos; //Position
 } portraits[] = {
-	{0, {  0,   0, 101, 102}, {65, 40}}, //BF normal
-	{0, {102,   0,  99, 102}, {65, 40}}, //BF confused
+	{0, {  0,   0,  88,  89}, {55, 33}}, //BF normal
+	{0, { 89,   0,  88,  89}, {55, 33}}, //BF confused
 	{1, {  0,   0, 129, 112}, {64, 56}}, //Psychic normal
 	{1, {130,   0, 117, 115}, {64, 56}}, //Psychic confused
 	{1, {  0, 113, 128, 117}, {64, 56}}, //Psychic excited
 	{1, {128, 115, 126, 122}, {64, 56}}, //Psychic shock
 	{2, {  0,   0, 128, 112}, {64, 56}}, //Psychic unamused
 	{2, {129,   0, 107, 104}, {64, 56}}, //Psychic annoyed
+	{3, {  0,   0,  78,  94}, {50, 36}}, //BF Senpai normal
+	{3, { 79,   0,  84,  99}, {50, 36}}, //BF Senpai shock
+	{3, {  0,  95,  79,  94}, {50, 36}}, //BF Senpai nervous
+	{3, { 80, 100,  79,  94}, {50, 36}}, //BF Senpai pissed
+	{4, {  0,   0,  83, 122}, {41, 61}}, //Spirit Normal
+	{5, {  0,   0, 112, 127}, {56, 63}}, //Floppa Normal
+	{5, {113,   0, 128,  95}, {56, 63}}, //Floppa Pissed
 };
 
 //welcome to the shitshow
@@ -3585,33 +3606,33 @@ void Stage_Tick(void)
             };
 
             static Dialogue_Struct wiltdia[] = {
-                {"Welp, you got me!", 0, Dialogue_BF_Normal, 0},
-                {"You're very clever, I'll give you that much.", 0, Dialogue_BF_Normal, 0},
-                {"No ordinary person would have seen\nthrough my facade.", 0, Dialogue_BF_Normal, 0},
+                {"Welp, you got me!", 0, Dialogue_Senpai_Normal, 0},
+                {"You're very clever, I'll give you that much.", 0, Dialogue_Senpai_Normal, 0},
+                {"No ordinary person would have seen\nthrough my facade.", 0, Dialogue_Senpai_Normal, 0},
                 {"Yeah, um...", 1, Dialogue_Psychic_Unamused, 0},
                 {"...Who are you again?", 1, Dialogue_Psychic_Shock, 0},
-                {"Kh...!", 0, Dialogue_BF_Normal, 1},
-                {"You don't even remember me?!", 0, Dialogue_BF_Normal, 0},
+                {"Kh...!", 0, Dialogue_Senpai_Shock, 1},
+                {"You don't even remember me?!", 0, Dialogue_Senpai_Shock, 0},
                 {"Not in the slightest.", 1, Dialogue_Psychic_Confused, 0},
-                {"Seriously?! W-Whatever!", 0, Dialogue_BF_Normal, 1},
-                {"Now listen here!", 0, Dialogue_BF_Normal, 0},
-                {"I've taken this body hostage, so\ndon't even try anything!", 0, Dialogue_BF_Normal, 0},
-                {"Summon Daddy Dearest here this instant,\nor else he gets it!",0, Dialogue_BF_Normal, 0},
+                {"Seriously?! W-Whatever!", 0, Dialogue_Senpai_Nervous, 1},
+                {"Now listen here!", 0, Dialogue_Senpai_Nervous, 0},
+                {"I've taken this body hostage, so\ndon't even try anything!", 0, Dialogue_Senpai_Nervous, 0},
+                {"Summon Daddy Dearest here this instant,\nor else he gets it!",0, Dialogue_Senpai_Nervous, 0},
                 {"...Daddy Dearest, huh..?", 1, Dialogue_Psychic_Confused, 0},
                 {"I don't know what your deal is, but...", 1, Dialogue_Psychic_Unamused, 0},
                 {"I don't take commands from freaks of\nnature like you.", 1, Dialogue_Psychic_Excited, 0},
-                {"What did you just call me?!", 0, Dialogue_BF_Normal, 1},
+                {"What did you just call me?!", 0, Dialogue_Senpai_Pissed, 1},
             };
 
             static Dialogue_Struct uproardia[] = {
                 {"At least that guy's gone, he was\ngetting on my nerves.", 1, Dialogue_Psychic_Annoyed, 0},
                 {"Let me guess, you're another thorn\nin my side, huh?", 1, Dialogue_Psychic_Unamused, 0},
-                {". . .", 0, Dialogue_BF_Normal, 0},
-                {"...You took the words straight\nfrom my mouth...", 0, Dialogue_BF_Normal, 0},
-                {"I had finally escaped that wretched\ngame, and of course YOU\nare here to greet me...", 0, Dialogue_BF_Normal, 0},
-                {"...No matter...", 0, Dialogue_BF_Normal, 0},
-                {"...I'll just kill you and finally get\nmy revenge... It's really that simple...", 0, Dialogue_BF_Normal, 0},
-                {"...You don't mind your body being\ndissipated, right? It's only fair...", 0, Dialogue_BF_Normal, 0},
+                {". . .", 0, Dialogue_Spirit_Normal, 0},
+                {"...You took the words straight\nfrom my mouth...", 0, Dialogue_Spirit_Normal, 0},
+                {"I had finally escaped that wretched\ngame, and of course YOU\nare here to greet me...", 0, Dialogue_Spirit_Normal, 0},
+                {"...No matter...", 0, Dialogue_Spirit_Normal, 0},
+                {"...I'll just kill you and finally get\nmy revenge... It's really that simple...", 0, Dialogue_Spirit_Normal, 0},
+                {"...You don't mind your body being\ndissipated, right? It's only fair...", 0, Dialogue_Spirit_Normal, 0},
                 {"You took the words straight from my mouth.", 1, Dialogue_Psychic_Excited, 0},
             };
 
@@ -3624,22 +3645,15 @@ void Stage_Tick(void)
                 {"Eep skee dah?", 0, Dialogue_BF_Normal, 0},
                 {"Since we're here anyway, I suppose one song\ncouldn't hurt.", 1, Dialogue_Psychic_Normal, 0},
             };
-            static const struct
-            {
-                const char *text; //The text that is displayed
-                u8 camera; //Who the camera is pointing at, 0 for bf, 1 for dad
-                int port1;
-                int port2;
-                int diaboxes;
-            }flopdia[] = {
-                {"Meow!",0, 13, 15, 0},
-                {"Beep.",1, 15, 6, 0},
-                {"HISSS",0, 14, 15, 1},
-                {"Bep bee aa skoo dep?",1, 15, 12, 0},
-                {"Meow Meow",0, 13, 15, 0},
-                {"Hiss",0, 14, 15, 1},
-                {"Beep bop!",1, 15, 6, 0},
-                {"HISSSS!!",0, 14, 15, 1},
+            static Dialogue_Struct flopdia[] = {
+                {"Meow!", 1, Dialogue_Floppa_Normal, 0},
+                {"Beep.", 0, Dialogue_BF_Normal, 0},
+                {"HISSS", 1, Dialogue_Floppa_Pissed, 1},
+                {"Bep bee aa skoo dep?", 0, Dialogue_BF_Confused, 0},
+                {"Meow Meow", 1, Dialogue_Floppa_Normal, 0},
+                {"Hiss", 1, Dialogue_Floppa_Pissed, 1},
+                {"Beep bop!", 0, Dialogue_BF_Normal, 0},
+                {"HISSSS!!", 1, Dialogue_Floppa_Pissed, 1},
             };
 
             //Clear per-frame flags
@@ -3667,6 +3681,10 @@ void Stage_Tick(void)
 					dialoguep = latedrivedia;
 					dialogue_final = COUNT_OF(latedrivedia);
 				break;
+				case StageId_2_3:
+					dialoguep = flopdia;
+					dialogue_final = COUNT_OF(flopdia);
+				break;
 				default:
 					dialoguep = psydia;
 					dialogue_final = COUNT_OF(psydia);
@@ -3678,7 +3696,8 @@ void Stage_Tick(void)
 			if (stage.delect == dialogue_final)
 			{
 				Audio_StopXA();
-				Stage_LoadStage();
+				if (stage.stage_id == StageId_1_2)
+					Stage_LoadStage();
 				stage.state = StageState_Play;
 				Stage_UnLoadDia();
 			}
@@ -3725,8 +3744,8 @@ void Stage_Tick(void)
 					Stage_DrawTex(&stage.tex_dia, &dia2_src, &dia2_dst, stage.bump);
 				}
 				
-				int pos_x = (dialoguep[stage.delect].camera) ? SCREEN_WIDTH2 - 50 : SCREEN_WIDTH - 50;
-				int pos_y = SCREEN_HEIGHT2;
+				int pos_x = (dialoguep[stage.delect].camera) ? SCREEN_WIDTH2 - 60 : SCREEN_WIDTH - 60;
+				int pos_y = SCREEN_HEIGHT2 + 5;
 				
 				//Draw Character portrait
 				RECT dst = {

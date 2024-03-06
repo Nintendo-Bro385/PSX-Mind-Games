@@ -11,7 +11,6 @@ all: \
 	iso/font/cdr.tim \
 	iso/stage/hud0.tim \
 	iso/stage/hud1.tim \
-	iso/stage/hud2.tim \
 	iso/stage/hud0weeb.tim \
 	iso/stage/dia.tim \
 	iso/stage/portraits/bf.arc \
@@ -65,7 +64,7 @@ iso/menu/backgrounds/week.arc: iso/menu/backgrounds/week0.tim iso/menu/backgroun
 # Character portraits
 iso/stage/portraits/bf.arc: iso/stage/portraits/bf.tim
 iso/stage/portraits/psychic.arc: iso/stage/portraits/psychic0.tim iso/stage/portraits/psychic1.tim
-iso/stage/portraits/senpai.arc: iso/stage/portraits/senpai0.tim iso/stage/portraits/senpai1.tim
+iso/stage/portraits/senpai.arc: iso/stage/portraits/senpai.tim
 iso/stage/portraits/spirit.arc: iso/stage/portraits/spirit.tim
 iso/stage/portraits/floppa.arc: iso/stage/portraits/floppa.tim
 

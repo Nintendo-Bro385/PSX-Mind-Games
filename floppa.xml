@@ -42,7 +42,6 @@
 			<dir name = "stage">
 				<file name = "hud0.tim" type = "data" source = "iso/stage/hud0.tim"/>
 				<file name = "hud1.tim" type = "data" source = "iso/stage/hud1.tim"/>
-				<file name = "hud2.tim" type = "data" source = "iso/stage/hud2.tim"/>
 				<file name = "hud0weeb.tim" type = "data" source = "iso/stage/hud0weeb.tim"/>
 				<file name = "dia.tim" type = "data" source = "iso/stage/dia.tim"/>
 			</dir>
@@ -114,8 +113,18 @@
 			<dir name = "portrait">
 				<!-- Boyfriend assets -->
 				<file name = "bf.arc" type = "data" source = "iso/stage/portraits/bf.arc"/>
+				
+				<!-- Boyfriend Senpai assets -->
+				<file name = "senpai.arc" type = "data" source = "iso/stage/portraits/senpai.arc"/>
+				
+				<!-- Spirit assets -->
+				<file name = "spirit.arc" type = "data" source = "iso/stage/portraits/spirit.arc"/>
+				
 				<!-- Psychic assets -->
 				<file name = "psychic.arc" type = "data" source = "iso/stage/portraits/psychic.arc"/>
+				
+				<!-- Floppa assets -->
+				<file name = "floppa.arc" type = "data" source = "iso/stage/portraits/floppa.arc"/>
 			</dir>
 			
 			<!-- Character assets -->
