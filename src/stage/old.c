@@ -13,6 +13,9 @@
 #include "../timer.h"
 #include "../animation.h"
 
+fixed_t fadeblack22, fadeblack23, fadespeed2, fadeextra22;
+boolean fademode2;
+
 //Week 4 background structure
 typedef struct
 {
@@ -75,7 +78,7 @@ void Old_Fire_SetFrame(void *user, u8 frame)
 	}
 }
 
-static const CharFrame wick_frame[4] = {
+/*static const CharFrame wick_frame[4] = {
 	{0, {  0, 175,  4,  8}, {0,  0}},
 	{0, {  4, 175,  4,  9}, {0,  1}},
 	{0, {  8, 175,  4,  7}, {0, -1}},
@@ -109,7 +112,7 @@ void Old_Wick_SetFrame(void *user, u8 frame)
 		//Check if new art shall be loaded
 		const CharFrame *cframe = &fire_frame[this->wick_frame = frame];
 	}
-}
+}*/
 
 void Back_Old_DrawBG(StageBack *back)
 {
@@ -176,7 +179,43 @@ void Back_Old_DrawBG(StageBack *back)
 		FIXED_DEC(166 + SCREEN_WIDEOADD,1),
 		FIXED_DEC(256,1)
 	};
+	
+	if (stage.stage_id == StageId_3_1)
+	{
+		//bft cutscene shit
+		if (fadeblack22 > 0 && fademode2 == 0)//
+		{
+			if (fadeblack22 >= 81858)
+			{
+				//This sucks
+				static const RECT flash = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+				u8 flash_col = fadeblack22 >> FIXED_SHIFT;//
+				u8 flash_col2 = fadeextra22 >> FIXED_SHIFT;
+				Gfx_BlendRect(&flash, flash_col, flash_col, flash_col, 2);
+			}
+			else
+			{
+   	 		static const RECT flash = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+				u8 flash_col = fadeblack22 >> FIXED_SHIFT;//
+				u8 flash_col2 = fadeextra22 >> FIXED_SHIFT;
+				Gfx_BlendRect(&flash, flash_col, flash_col, flash_col, 2);
+				fadeblack22 += FIXED_MUL(fadespeed2, timer_dt*3);  //
+			}
 
+	
+		}
+
+		if (fadeblack23 > 0 && fademode2 == 1)
+		{
+   	 	static const RECT flash = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+			u8 flash_col = fadeblack23 >> FIXED_SHIFT;//
+			u8 flash_col2 = fadeextra22 >> FIXED_SHIFT;
+			Gfx_BlendRect(&flash, flash_col, flash_col, flash_col, 2);
+			fadeblack23 -= FIXED_MUL(fadespeed2, timer_dt*3); //
+	
+		}
+	}
+	
 	//Old_Fire_Draw(this, FIXED_DEC(85,1) - fx, FIXED_DEC(31,1) - fy);
 	//Old_Wick_Draw(this, FIXED_DEC(41,1) - fx, FIXED_DEC(-26,1) - fy);
 	//Old_Wick_Draw(this, FIXED_DEC(55,1) - fx, FIXED_DEC(-21,1) - fy);
@@ -189,6 +228,20 @@ void Back_Old_DrawBG(StageBack *back)
 	Stage_DrawTex(&this->tex_floor, &floorr_src, &floorr_dst, stage.camera.bzoom);
 	Stage_DrawTex(&this->tex_back0, &halll_src, &halll_dst, stage.camera.bzoom);
 	Stage_DrawTex(&this->tex_back1, &hallr_src, &hallr_dst, stage.camera.bzoom);
+	}
+	
+	if (stage.stage_id == StageId_3_1)
+	{
+		switch (stage.song_step)
+		{
+			case 10:
+			{
+				fadeblack22 = 1;
+				fadeextra22 = FIXED_DEC(0,1);//
+				fadespeed2 = FIXED_DEC(46,10);
+				break;
+			}
+		}
 	}
 }
 
@@ -233,6 +286,10 @@ StageBack *Back_Old_New(void)
 
 	//Animatable_Init(&this->wick_animatable, wick_anim);
 	//Animatable_SetAnim(&this->wick_animatable, 0);
+	
+	fademode2 = 0;
+	fadeblack22 = 0;
+	fadeblack23 = 0;
 	
 	
 	

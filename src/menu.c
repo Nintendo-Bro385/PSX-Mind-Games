@@ -176,12 +176,13 @@ static struct
         struct
         {
             u8 id, diff;
+            int setselect;
             boolean story;
         } stage;
     } page_param;
     
     //Menu assets
-    Gfx_Tex tex_back, tex_back1, tex_back2, tex_ng, tex_story, tex_title, tex_week;
+    Gfx_Tex tex_back, tex_back1, tex_back2, tex_ng, tex_story, tex_options, tex_title, tex_week;
     IO_Data weeks, weeks_ptrs[128];
     int curweek;
 
@@ -401,6 +402,56 @@ static void Menu_DifficultySelector(s32 x, s32 y)
 	const RECT *diff_src = &diff_srcs[menu.page_param.stage.diff];
 	Gfx_BlitTex(&menu.tex_story, diff_src, x - (diff_src->w >> 1), y - 9 + ((pad_state.press & (PAD_LEFT | PAD_RIGHT)) != 0));
 }
+static void Menu_Options(s32 x, s32 y)
+{
+	//Change difficulty
+	if (menu.next_page == menu.page && Trans_Idle())
+	{
+		if (pad_state.press & PAD_L1)
+		{
+			if (menu.page_param.stage.setselect >0)
+			{
+				menu.page_param.stage.setselect--;
+				menu.select = 0;
+			}
+			else
+			{
+				menu.page_param.stage.setselect = 1;
+				menu.select = 0;
+			}
+		}
+		if (pad_state.press & PAD_R1)
+		{
+			if (menu.page_param.stage.setselect <1)
+			{
+				menu.page_param.stage.setselect++;
+				menu.select = 0;
+			}
+			else
+			{	menu.page_param.stage.setselect = 0;
+				menu.select = 0;
+			}
+		}
+	}
+	//Draw difficulty arrows
+	static const RECT arrow_src[2][2] = {
+		{{224, 64, 16, 32}, {224, 96, 16, 32}}, //left
+		{{240, 64, 16, 32}, {240, 96, 16, 32}}, //right
+	};
+	
+	Gfx_BlitTex(&menu.tex_options, &arrow_src[0][(pad_state.held & PAD_L1) != 0], x - 40 - 16, y - 16);
+	Gfx_BlitTex(&menu.tex_options, &arrow_src[1][(pad_state.held & PAD_R1) != 0], x + 40, y - 16);
+	
+	//Draw difficulty
+	static const RECT sets_srcs[] = {
+		{  0, 96, 72, 18},
+		{ 72, 96, 72, 18},
+		{144, 96, 67, 18},
+	};
+	
+	const RECT *sets_src = &sets_srcs[menu.page_param.stage.setselect];
+	Gfx_BlitTex(&menu.tex_options, sets_src, x - (sets_src->w >> 1), y - 9 + ((pad_state.press & (PAD_L1 | PAD_R1)) != 0));
+}
 static void Menu_DrawWeek(const char *week, s32 x, s32 y)
 {
     //Draw label
@@ -471,6 +522,29 @@ static void Menu_DrawBigCredits(u8 i, s16 x, s16 y)
     //Draw health icon
     Gfx_DrawTex(&stage.tex_hud2, &src, &dst);
 }
+static void Menu_DrawOptions(u8 i, s16 x, s16 y, boolean is_bool)
+{
+    //Icon Size
+    u8 iconx_size = (is_bool) ? 32 : 64;
+    u8 icony_size = 32;
+
+    //Get src and dst
+    RECT src = {
+        (i % 8) * iconx_size,
+        (i / 8) * icony_size,
+        iconx_size,
+        icony_size
+    };
+    RECT dst = {
+        x,
+        y,
+        iconx_size,
+        32
+    };
+    
+    //Draw health icon
+    Gfx_DrawTex(&menu.tex_options, &src, &dst);
+}
 static void Menu_DrawHealth(u8 i, s16 x, s16 y, boolean is_selected)
 {
     //Icon Size
@@ -521,6 +595,7 @@ void Menu_Load(MenuPage page)
     Gfx_LoadTex(&menu.tex_back2, Archive_Find(menu_arc, "back2.tim"), 0);
     Gfx_LoadTex(&menu.tex_ng,    Archive_Find(menu_arc, "ng.tim"),    0);
     Gfx_LoadTex(&menu.tex_story, Archive_Find(menu_arc, "story.tim"), 0);
+    Gfx_LoadTex(&menu.tex_options, Archive_Find(menu_arc, "options.tim"), 0);
     Gfx_LoadTex(&menu.tex_title, Archive_Find(menu_arc, "title.tim"), 0);
     Gfx_LoadTex(&stage.tex_hud1, Archive_Find(menu_arc, "hud1.tim"), 0);
     Gfx_LoadTex(&stage.tex_hud2, Archive_Find(menu_arc, "hud2.tim"), 0);
@@ -828,6 +903,7 @@ void Menu_Tick(void)
                 {"UNLOCK ALL ACHIEVEMENTS"},
                 {"BF TO SENPAI"},
                 {"SENPAI TO SPIRIT"},
+                {"BF SCREAM"},
                 {"CLUCKED"},
             };
             if (stage.prefs.secretunlocked == true)
@@ -999,6 +1075,16 @@ void Menu_Tick(void)
 		        }
                 }
                 else if (menu.select == 5)
+                {
+                	if (pad_state.press & (PAD_START | PAD_CROSS))
+                	{
+                	    menu.next_page = MenuPage_Stage;
+		            menu.page_param.stage.id = StageId_3_1;
+		            menu.page_param.stage.story = false;
+		            Trans_Start();
+		        }
+                }
+                else if (menu.select == 6)
                 {
                 	if (pad_state.press & (PAD_START | PAD_CROSS))
                 	{
@@ -1759,14 +1845,14 @@ void Menu_Tick(void)
 		    //Draw mind games port version identification
 		    menu.font_arial.draw(&menu.font_arial,
 		        "No memorycard inserted",
-		        8,
+		        30,
 		        8,
 		        FontAlign_Left
 		    );
             }
             
             //Draw difficulty selector
-            Menu_DifficultySelector(SCREEN_WIDTH - 100, SCREEN_HEIGHT2 - 48);
+	    Menu_DifficultySelector(SCREEN_WIDTH - 62, 100);
             
             //Handle option and selection
             if (menu.next_page == menu.page && Trans_Idle())
@@ -1798,13 +1884,6 @@ void Menu_Tick(void)
 				    menu.page_param.stage.story = false;
 				    Trans_Start();
 				}
-				if (pad_state.press & PAD_TRIANGLE)
-				{
-				    menu.next_page = MenuPage_Stage;
-				    menu.page_param.stage.id = menu_options[menu.select].stage;
-				    menu.page_param.stage.story = true;
-				    Trans_Start();
-				}
 		        }
 		        else
 		        {
@@ -1814,13 +1893,6 @@ void Menu_Tick(void)
 				    menu.next_page = MenuPage_Stage;
 				    menu.page_param.stage.id = menu_options[menu.select].stage;
 				    menu.page_param.stage.story = true;
-				    Trans_Start();
-				}
-				if (pad_state.press & PAD_TRIANGLE)
-				{
-				    menu.next_page = MenuPage_Stage;
-				    menu.page_param.stage.id = menu_options[menu.select].stage;
-				    menu.page_param.stage.story = false;
 				    Trans_Start();
 				}
 		        }
@@ -1854,8 +1926,19 @@ void Menu_Tick(void)
             }
             
             //Draw box at the bottom
-            RECT song_box = {0, 210, 320, 30};
-            Gfx_BlendRect(&song_box, 32, 32, 32, 0);
+		RECT song_box = {0, 210, 320, 30};
+		Gfx_DrawRect(&song_box, 0, 0, 0);
+			
+			//Draw page label
+			menu.font_bold.draw(&menu.font_bold,
+				"freeplay",
+				8,
+				7,
+				FontAlign_Left
+			);
+		//Draw box at the bottom
+		RECT top_box = {0, 0, 320, 30};
+		Gfx_DrawRect(&top_box, 0, 0, 0);
             
             //Draw options
             s32 next_scroll = menu.select * FIXED_DEC(40,1);
@@ -1871,18 +1954,18 @@ void Menu_Tick(void)
                     break;
                 
                 //Draw Icon
-                Menu_DrawHealth(menu_options[i].icon, strlen(menu_options[i].text) * 15 + 32 + 8 + (y / 4) -18, SCREEN_HEIGHT2 + y - 17, menu.select == i);
-                
-                //Draw text
-                menu.font_bold.draw_col(&menu.font_bold,
-                    Menu_LowerIf(menu_options[i].text, NULL),
-                    30 + (y >> 2),
-                    SCREEN_HEIGHT2 + y - 8,
-                    FontAlign_Left,
-                    (menu.select == i) ? 128 : 64,
-                    (menu.select == i) ? 128 : 64,
-                    (menu.select == i) ? 128 : 64
-                );
+		Menu_DrawHealth(menu_options[i].icon, strlen(menu_options[i].text) * 14 + 32 + 8 -18, SCREEN_HEIGHT2 + y - 17 -4, menu.select == i);
+		
+		//Draw text
+		menu.font_bold.draw_col(&menu.font_bold,
+			Menu_LowerIf(menu_options[i].text, NULL),
+			15,
+			SCREEN_HEIGHT2 + y - 10,
+			FontAlign_Left,
+			(menu.select == i) ? 128 : 64,
+			(menu.select == i) ? 128 : 64,
+			(menu.select == i) ? 128 : 64
+		);
             }
             
             //Draw background
@@ -2070,20 +2153,12 @@ void Menu_Tick(void)
                 menu.page_param.stage.diff = StageDiff_Normal;
                 stage.backpick = RandomRange(0, 2);
             }
-            
-            //Draw page label
-            menu.font_bold.draw(&menu.font_bold,
-                "awards",
-                16,
-                SCREEN_HEIGHT - 48,
-                FontAlign_Left
-            );
             if(nomem == true)
             {
 		    //Draw mind games port version identification
 		    menu.font_arial.draw(&menu.font_arial,
 		        "No memorycard inserted",
-		        8,
+		        30,
 		        8,
 		        FontAlign_Left
 		    );
@@ -2118,8 +2193,19 @@ void Menu_Tick(void)
             }
             
             //Draw box at the bottom
-            RECT song_box = {0, 210, 320, 30};
-            Gfx_BlendRect(&song_box, 32, 32, 32, 0);
+		RECT song_box = {0, 210, 320, 30};
+		Gfx_DrawRect(&song_box, 0, 0, 0);
+		
+		//Draw page label
+		menu.font_bold.draw(&menu.font_bold,
+			"awards",
+			8,
+			7,
+			FontAlign_Left
+		);
+		//Draw box at the bottom
+		RECT top_box = {0, 0, 320, 30};
+		Gfx_DrawRect(&top_box, 0, 0, 0);
             
             //Draw options
             s32 next_scroll = menu.select * FIXED_DEC(40,1);
@@ -2185,6 +2271,14 @@ void Menu_Tick(void)
                 {" "},
                 {" "},
                 {" "},
+                {"playtesters"},
+                {" "},
+                {" "},
+                {" "},
+                {"special thanks"},
+                {" "},
+                {" "},
+                {" "},
                 {"flop engine"},
                 {" "},
                 {" "},
@@ -2220,12 +2314,20 @@ void Menu_Tick(void)
                 {"igorsou3000", 13, 33, 0xFFfb6c23},
                 {"spicyjpeg", 14, 35, 0xFFfb6c23},
                 {" ", 0, 8, 0xFFffe400},
+                {" ", 0, 8, 0x0d5ab8},
+                {"littlefabi", 20, 38, 0x0d5ab8},
+                {"john paul", 21, 39, 0xd3ccab},
+                {" ", 0, 8, 0xd3ccab},
+                {" ", 0, 8, 0x29b0d2},
+                {"psxfunkin", 15, 36, 0x29b0d2},
+                {"basement", 16, 37, 0xd3ccab},
+                {" ", 0, 8, 0xd3ccab},
                 {" ", 0, 8, 0xFF51ffb3},
-                {"nintendo bro", 15, 20, 0xFF51ffb3},
-                {"igorsou3000", 16, 33, 0xFFfb6c23},
+                {"nintendo bro", 17, 20, 0xFF51ffb3},
+                {"igorsou3000", 18, 33, 0xFFfb6c23},
                 {" ", 0, 8, 0xFFfb6c23},
                 {" ", 0, 8, 0xFFfb6c23},
-                {"ckdev" , 17, 21,0xFFc5f05f},
+                {"ckdev" , 19, 21,0xFFc5f05f},
             };
             switch (menu_options[menu.select].about)
             {
@@ -2254,23 +2356,23 @@ void Menu_Tick(void)
                     menu.font_arial.draw(&menu.font_arial,
                         "RiverOaken", 
                         256,
-                        98,
+                        128,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Project Lead",
                         256,
-                        110,
+                        140,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "& Animator",
                         256,
-                        122,
+                        152,
                         FontAlign_Center
                     );
                     //Draw else about pic
-                    Menu_DrawBigCredits(15, 224, 16);
+                    Menu_DrawBigCredits(15, 224, 46);
                     break;
                 }
                 case 2:
@@ -2279,17 +2381,17 @@ void Menu_Tick(void)
                     menu.font_arial.draw(&menu.font_arial,
                         "Shadow Mario", 
                         256,
-                        98,
+                        128,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Main Programmer",
                         256,
-                        110,
+                        140,
                         FontAlign_Center
                     );
                     //Draw else about pic
-                    Menu_DrawBigCredits(15, 224, 16);
+                    Menu_DrawBigCredits(15, 224, 46);
                     break;
                 }
                 case 3:
@@ -2298,17 +2400,17 @@ void Menu_Tick(void)
                     menu.font_arial.draw(&menu.font_arial,
                         "iFlicky", 
                         256,
-                        98,
+                        128,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Main Composer",
                         256,
-                        110,
+                        140,
                         FontAlign_Center
                     );
                     //Draw else about pic
-                    Menu_DrawBigCredits(15, 224, 16);
+                    Menu_DrawBigCredits(15, 224, 46);
                     break;
                 }
                 case 4:
@@ -2317,17 +2419,17 @@ void Menu_Tick(void)
                     menu.font_arial.draw(&menu.font_arial,
                         "Leomming", 
                         256,
-                        98,
+                        128,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Additional Arts",
                         256,
-                        110,
+                        140,
                         FontAlign_Center
                     );
                     //Draw else about pic
-                    Menu_DrawBigCredits(15, 224, 16);
+                    Menu_DrawBigCredits(15, 224, 46);
                     break;
                 }
                 case 5:
@@ -2336,23 +2438,23 @@ void Menu_Tick(void)
                     menu.font_arial.draw(&menu.font_arial,
                         "PJsVoiceArts", 
                         256,
-                        98,
+                        128,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Psychic and Spirit's",
                         256,
-                        110,
+                        140,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Voice Actor",
                         256,
-                        122,
+                        152,
                         FontAlign_Center
                     );
                     //Draw else about pic
-                    Menu_DrawBigCredits(15, 224, 16);
+                    Menu_DrawBigCredits(15, 224, 46);
                     break;
                 }
                 case 6:
@@ -2361,17 +2463,17 @@ void Menu_Tick(void)
                     menu.font_arial.draw(&menu.font_arial,
                         "Iymph", 
                         256,
-                        98,
+                        128,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Uproar's Charter",
                         256,
-                        110,
+                        140,
                         FontAlign_Center
                     );
                     //Draw else about pic
-                    Menu_DrawBigCredits(15, 224, 16);
+                    Menu_DrawBigCredits(15, 224, 46);
                     break;
                 }
                 case 7:
@@ -2380,23 +2482,23 @@ void Menu_Tick(void)
                     menu.font_arial.draw(&menu.font_arial,
                         "Salvati", 
                         256,
-                        98,
+                        128,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Psychic's Soundfont",
                         256,
-                        110,
+                        140,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Creator",
                         256,
-                        122,
+                        152,
                         FontAlign_Center
                     );
                     //Draw else about pic
-                    Menu_DrawBigCredits(15, 224, 16);
+                    Menu_DrawBigCredits(15, 224, 46);
                     break;
                 }
                 case 8:
@@ -2405,23 +2507,23 @@ void Menu_Tick(void)
                     menu.font_arial.draw(&menu.font_arial,
                         "slabraccoon", 
                         256,
-                        98,
+                        128,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Emotional Support",
                         256,
-                        110,
+                        140,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Raccoon",
                         256,
-                        122,
+                        152,
                         FontAlign_Center
                     );
                     //Draw else about pic
-                    Menu_DrawBigCredits(15, 224, 16);
+                    Menu_DrawBigCredits(15, 224, 46);
                     break;
                 }
                 case 9:
@@ -2430,45 +2532,52 @@ void Menu_Tick(void)
                     menu.font_arial.draw(&menu.font_arial,
                         "Nintendo Bro385", 
                         256,
-                        98,
+                        128,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Title psychic &",
                         256,
-                        110,
+                        140,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "BFSpirit",
                         256,
-                        122,
+                        152,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Health icons",
                         256,
-                        134,
+                        164,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Death animations",
                         256,
-                        146,
+                        176,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Menu &",
                         256,
-                        158,
+                        188,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Achievements code",
                         256,
-                        170,
+                        200,
                         FontAlign_Center
                     );
+                    //Draw page label
+		    menu.font_arial.draw(&menu.font_arial,
+		        "Some of bilious work I had to finish off so... yeah",
+		        16,
+		        217,
+		        FontAlign_Left
+		    );
                     if (pad_state.press & (PAD_START | PAD_CROSS))
                     {
 		    	Audio_StopXA();
@@ -2478,7 +2587,7 @@ void Menu_Tick(void)
 		        stage.prefs.flopg_awards =true;
                     }
                     //Draw nintendobro about pic
-                    Menu_DrawBigCredits(0, 224, 16);
+                    Menu_DrawBigCredits(0, 224, 46);
                     break;
                 }
                 case 10:
@@ -2487,41 +2596,41 @@ void Menu_Tick(void)
                     menu.font_arial.draw(&menu.font_arial,
                         "BiliousData", 
                         256,
-                        98,
+                        128,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Psychic & BFSenpai",
                         256,
-                        110,
+                        140,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Sprite cutscenes",
                         256,
-                        122,
+                        152,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Backgrounds",
                         256,
-                        134,
+                        164,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Arrow Movement &",
                         256,
-                        146,
+                        176,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Dialogue Code",
                         256,
-                        158,
+                        188,
                         FontAlign_Center
                     );
                     //Draw biliousdata about pic
-                    Menu_DrawBigCredits(8, 224, 16);
+                    Menu_DrawBigCredits(8, 224, 46);
                     break;
                 }
                 case 11:
@@ -2530,18 +2639,18 @@ void Menu_Tick(void)
                     menu.font_arial.draw(&menu.font_arial,
                         "MrRumbleRoses", 
                         256,
-                        98,
+                        128,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Got Permissions",
                         256,
-                        110,
+                        140,
                         FontAlign_Center
                     );
 
                     //Draw mrrumbleroses about pic
-                    Menu_DrawBigCredits(12, 224, 16);
+                    Menu_DrawBigCredits(12, 224, 46);
                     break;
                 }
                 case 12:
@@ -2550,23 +2659,23 @@ void Menu_Tick(void)
                     menu.font_arial.draw(&menu.font_arial,
                         "UNSTOP4BLE", 
                         256,
-                        98,
+                        128,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Coding help",
                         256,
-                        110,
+                        140,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Story Backgrounds",
                         256,
-                        122,
+                        152,
                         FontAlign_Center
                     );
                     //Draw UNSTOP4BLE about pic
-                    Menu_DrawBigCredits(1, 224, 16);
+                    Menu_DrawBigCredits(1, 224, 46);
                     break;
                 }
                 case 13:
@@ -2575,23 +2684,23 @@ void Menu_Tick(void)
                     menu.font_arial.draw(&menu.font_arial,
                         "IgorSou3000", 
                         256,
-                        98,
+                        128,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Movies &",
                         256,
-                        110,
+                        140,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Dialogue portraits",
                         256,
-                        122,
+                        152,
                         FontAlign_Center
                     );
                     //Draw nintendobro about pic
-                    Menu_DrawBigCredits(5, 224, 16);
+                    Menu_DrawBigCredits(5, 224, 46);
                     break;
                 }
                 case 14:
@@ -2600,70 +2709,110 @@ void Menu_Tick(void)
                     menu.font_arial.draw(&menu.font_arial,
                         "spicyjpeg",
                         256,
-                        98,
+                        128,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Movie & Save",
                         256,
-                        110,
+                        140,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "code",
                         256,
-                        122,
+                        152,
                         FontAlign_Center
                     );
                     //Draw ckdev about pic
-                    Menu_DrawBigCredits(13, 224, 16);
+                    Menu_DrawBigCredits(13, 224, 46);
                     break;
                 }
                 case 15:
                 {
                     //Draw text
                     menu.font_arial.draw(&menu.font_arial,
-                        "Nintendo Bro385", 
+                        "PSXFunkin Server", 
                         256,
-                        98,
+                        128,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
-                        "Flop Engine",
+                        "helpful place",
                         256,
-                        110,
+                        140,
                         FontAlign_Center
                     );
-                    //Draw nintendobro about pic
-                    Menu_DrawBigCredits(0, 224, 16);
+
+                    //Draw mrrumbleroses about pic
+                    Menu_DrawBigCredits(2, 224, 46);
                     break;
                 }
                 case 16:
                 {
                     //Draw text
                     menu.font_arial.draw(&menu.font_arial,
+                        "UNSTOP4BLES Basement", 
+                        256,
+                        128,
+                        FontAlign_Center
+                    );
+                    menu.font_arial.draw(&menu.font_arial,
+                        "also a helpful place",
+                        256,
+                        140,
+                        FontAlign_Center
+                    );
+
+                    //Draw mrrumbleroses about pic
+                    Menu_DrawBigCredits(3, 224, 46);
+                    break;
+                }
+                case 17:
+                {
+                    //Draw text
+                    menu.font_arial.draw(&menu.font_arial,
+                        "Nintendo Bro385", 
+                        256,
+                        128,
+                        FontAlign_Center
+                    );
+                    menu.font_arial.draw(&menu.font_arial,
+                        "Flop Engine",
+                        256,
+                        140,
+                        FontAlign_Center
+                    );
+                    //Draw nintendobro about pic
+                    Menu_DrawBigCredits(0, 224, 46);
+                    break;
+                }
+                case 18:
+                {
+                    //Draw text
+                    menu.font_arial.draw(&menu.font_arial,
                         "IgorSou3000", 
                         256,
-                        98,
+                        128,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Freeplay & Credits",
                         256,
-                        110,
+                        140,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "Icon code",
                         256,
-                        122,
+                        152,
                         FontAlign_Center
                     );
                     //Draw nintendobro about pic
-                    Menu_DrawBigCredits(5, 224, 16);
+                    Menu_DrawBigCredits(5, 224, 46);
                     break;
                 }
-                case 17:
+                case 19:
                 {
                     if (pad_state.press & (PAD_START | PAD_CROSS))
                 	{
@@ -2676,17 +2825,69 @@ void Menu_Tick(void)
                     menu.font_arial.draw(&menu.font_arial,
                         "CKDEV",
                         256,
-                        98,
+                        128,
                         FontAlign_Center
                     );
                     menu.font_arial.draw(&menu.font_arial,
                         "PSXFunkin Creator",
                         256,
-                        110,
+                        140,
                         FontAlign_Center
                     );
                     //Draw ckdev about pic
-                    Menu_DrawBigCredits(4, 224, 16);
+                    Menu_DrawBigCredits(4, 224, 46);
+                    break;
+                }
+                case 20:
+                {
+                    if (pad_state.press & (PAD_START | PAD_CROSS))
+                	{
+                	    menu.next_page = MenuPage_Stage;
+		            menu.page_param.stage.id = StageId_2_4;
+		            menu.page_param.stage.story = false;
+		            Trans_Start();
+		        }
+                    //Draw text
+                    menu.font_arial.draw(&menu.font_arial,
+                        "Little Fabi",
+                        256,
+                        128,
+                        FontAlign_Center
+                    );
+                    menu.font_arial.draw(&menu.font_arial,
+                        "Playtester",
+                        256,
+                        140,
+                        FontAlign_Center
+                    );
+                    //Draw ckdev about pic
+                    Menu_DrawBigCredits(6, 224, 46);
+                    break;
+                }
+                case 21:
+                {
+                    if (pad_state.press & (PAD_START | PAD_CROSS))
+                	{
+                	    menu.next_page = MenuPage_Stage;
+		            menu.page_param.stage.id = StageId_2_4;
+		            menu.page_param.stage.story = false;
+		            Trans_Start();
+		        }
+                    //Draw text
+                    menu.font_arial.draw(&menu.font_arial,
+                        "John Paul",
+                        256,
+                        128,
+                        FontAlign_Center
+                    );
+                    menu.font_arial.draw(&menu.font_arial,
+                        "Playtester",
+                        256,
+                        140,
+                        FontAlign_Center
+                    );
+                    //Draw ckdev about pic
+                    Menu_DrawBigCredits(7, 224, 46);
                     break;
                 }
                     
@@ -2702,13 +2903,20 @@ void Menu_Tick(void)
                 stage.backpick = RandomRange(0, 2);
             }
             
-            //Draw page label
-            menu.font_bold.draw(&menu.font_bold,
-                "credits",
-                16,
-                SCREEN_HEIGHT - 32,
-                FontAlign_Left
-            );
+            //Draw box at the bottom
+		RECT song_box = {0, 210, 320, 30};
+		Gfx_DrawRect(&song_box, 0, 0, 0);
+		
+		//Draw page label
+		menu.font_bold.draw(&menu.font_bold,
+			"credits",
+			8,
+			7,
+			FontAlign_Left
+		);
+		//Draw box at the bottom
+		RECT top_box = {0, 0, 320, 30};
+		Gfx_DrawRect(&top_box, 0, 0, 0);
             
             //Handle option and selection
             if (menu.next_page == menu.page && Trans_Idle())
@@ -2807,307 +3015,357 @@ void Menu_Tick(void)
         }
         case MenuPage_Options:
         {
-            static const char *gamemode_strs[] = {"NORMAL", "SWAP", "TWO PLAYER"};
-            static const struct
-            {
-                enum
-                {
-                    OptType_Boolean,
-                    OptType_Enum,
-                } type;
-                const char *text;
-                void *value;
-                union
-                {
-                    struct
-                    {
-                        int a;
-                    } spec_boolean;
-                    struct
-                    {
-                        s32 max;
-                        const char **strs;
-                    } spec_enum;
-                } spec;
-            } menu_options[] = {
-                {OptType_Enum,    "GAMEMODE", &stage.mode, {.spec_enum = {COUNT_OF(gamemode_strs), gamemode_strs}}},
-                //{OptType_Boolean, "INTERPOLATION", &stage.expsync},
-                //{OptType_Boolean, "GHOST TAP ", &stage.prefs.ghost, {.spec_boolean = {0}}},
-                {OptType_Boolean, "DOWNSCROLL", &stage.prefs.downscroll, {.spec_boolean = {0}}},
-                {OptType_Boolean, "BOTPLAY", &stage.prefs.botplay, {.spec_boolean = {0}}},
-                {OptType_Boolean, "LOW QUALITY", &stage.prefs.lowquality, {.spec_boolean = {0}}},
-            };
-            
-            //Initialize page
-            if (menu.page_swap){
-                menu.scroll = COUNT_OF(menu_options) * FIXED_DEC(24 + SCREEN_HEIGHT2,1);
-                stage.backpick = RandomRange(0, 2);
-            }
-            
-            //Draw page label
-            menu.font_bold.draw(&menu.font_bold,
-                "options",
-                16,
-                SCREEN_HEIGHT - 48,
-                FontAlign_Left
-            );
-            //Draw page label
-            menu.font_arial.draw(&menu.font_arial,
-                "Press Triangle for Music Options",
-                1,
-                217,
-                FontAlign_Left
-            );
-            if(nomem == true)
-            {
-		    //Draw mind games port version identification
-		    menu.font_arial.draw(&menu.font_arial,
-		        "No memorycard inserted",
-		        8,
-		        8,
-		        FontAlign_Left
-		    );
-            }
-            
-            //Handle option and selection
-            if (menu.next_page == menu.page && Trans_Idle())
-            {
-                //Change option
-                if (pad_state.press & PAD_UP)
-                {
-                    if (menu.select > 0)
-                        menu.select--;
-                    else
-                        menu.select = COUNT_OF(menu_options) - 1;
-                }
-                if (pad_state.press & PAD_DOWN)
-                {
-                    if (menu.select < COUNT_OF(menu_options) - 1)
-                        menu.select++;
-                    else
-                        menu.select = 0;
-                }
-                
-                //Handle option changing
-                switch (menu_options[menu.select].type)
-                {
-                    case OptType_Boolean:
-                        if (pad_state.press & (PAD_CROSS | PAD_LEFT | PAD_RIGHT))
-                            *((boolean*)menu_options[menu.select].value) ^= 1;
-                        break;
-                    case OptType_Enum:
-                        if (pad_state.press & PAD_LEFT)
-                            if (--*((s32*)menu_options[menu.select].value) < 0)
-                                *((s32*)menu_options[menu.select].value) = menu_options[menu.select].spec.spec_enum.max - 1;
-                        if (pad_state.press & PAD_RIGHT)
-                            if (++*((s32*)menu_options[menu.select].value) >= menu_options[menu.select].spec.spec_enum.max)
-                                *((s32*)menu_options[menu.select].value) = 0;
-                        break;
-                }
-                
-                //Return to main menu if circle is pressed
-                if (pad_state.press & PAD_TRIANGLE)
-                {
-                    menu.next_page = MenuPage_Music;
-                    menu.next_select = 0; //music
-                    Trans_Start();
-                }
-                //Return to main menu if circle is pressed
-                if (pad_state.press & PAD_CIRCLE)
-                {	
-                    menu.next_page = MenuPage_Main;
-                    menu.next_select = 4; //Options
-                    Trans_Start();
-                }
-            }
-            
-             //Draw box at the bottom
-            RECT song_box = {0, 210, 320, 30};
-            Gfx_BlendRect(&song_box, 32, 32, 32, 0);
-            
-            //Draw options
-            s32 next_scroll = menu.select * FIXED_DEC(24,1);
-            menu.scroll += (next_scroll - menu.scroll) >> 4;
-            
-            for (u8 i = 0; i < COUNT_OF(menu_options); i++)
-            {
-                //Get position on screen
-                s32 y = (i * 24) - 8 - (menu.scroll >> FIXED_SHIFT);
-                if (y <= -SCREEN_HEIGHT2 - 8)
-                    continue;
-                if (y >= SCREEN_HEIGHT2 + 8)
-                    break;
-                
-                //Draw text
-                char text[0x80];
-                switch (menu_options[i].type)
-                {
-                    case OptType_Boolean:
-                        sprintf(text, "%s %s", menu_options[i].text, *((boolean*)menu_options[i].value) ? "ON" : "OFF");
-                        break;
-                    case OptType_Enum:
-                        sprintf(text, "%s %s", menu_options[i].text, menu_options[i].spec.spec_enum.strs[*((s32*)menu_options[i].value)]);
-                        break;
-                }
-                menu.font_bold.draw(&menu.font_bold,
-                    Menu_LowerIf(text, menu.select != i),
-                    48 + (y >> 2),
-                    SCREEN_HEIGHT2 + y - 8,
-                    FontAlign_Left
-                );
-            }
-            
-            //Draw background
-            Menu_DrawBack(
-                true,
-                8,
-                253 >> 1, 113 >> 1, 155 >> 1,
-                0, 0, 0
-            );
-            break;
-        }
-        case MenuPage_Music:
+        	//Draw difficulty selector
+		Menu_Options(160, 58);
+        switch(menu.page_param.stage.setselect)
         {
-            static const struct
+            case 0:
             {
-                u32 col;
-		const char *text;
-		int music;
-            } menu_options[] = {
-                {0xFF9b30f3, "GETTIN FREAKY", 0},
-                {0xFFfde771, "OG GETTIN FREAKY", 1},
-                {0xFFfd719b, "LUDUM", 2},
-            };
-            switch (menu_options[menu.select].music)
+		    static const char *gamemode_strs[] = {"NORMAL", "SWAP", "TWO PLAYER"};
+		    static const struct
 		    {
-		        case 0:
-		        {   
-		            if (pad_state.press & (PAD_START | PAD_CROSS))
+		        enum
+		        {
+		            OptType_Boolean,
+		            OptType_Enum,
+		        } type;
+		        const char *text;
+		        void *value;
+		        union
+		        {
+		            struct
 		            {
-		                //Play Tutorial Music
-		                Audio_StopXA();
-		                Audio_PlayXA_Track(XA_GettinFreaky, 0x40, 0, 1);
-		                Audio_WaitPlayXA();
-		                stage.prefs.menumusic=0;
-		                /*menu.next_page = MenuPage_Opening;
-				    menu.next_select = 0; //Mods
-				    Trans_Start();*/
-		            }
-		            break;
+		                int a;
+		            } spec_boolean;
+		            struct
+		            {
+		                s32 max;
+		                const char **strs;
+		            } spec_enum;
+		        } spec;
+		        int optionsicon;
+		    } menu_options[] = {
+		        {OptType_Enum,    "GAMEMODE", &stage.prefs.mode, {.spec_enum = {COUNT_OF(gamemode_strs), gamemode_strs}}, 0},
+		        //{OptType_Boolean, "INTERPOLATION", &stage.prefs.expsync, 15},
+		        //{OptType_Boolean, "GHOST TAP ", &stage.prefs.ghost, {.spec_boolean = {0}}, 13},
+		        {OptType_Boolean, "DOWNSCROLL", &stage.prefs.downscroll, {.spec_boolean = {0}}, 6},
+		        {OptType_Boolean, "BOTPLAY", &stage.prefs.botplay, {.spec_boolean = {0}}, 8},
+		        {OptType_Boolean, "LOW QUALITY", &stage.prefs.lowquality, {.spec_boolean = {0}}, 10},
+		    };
+		    
+		    //Initialize page
+		    if (menu.page_swap){
+		        menu.scroll = -31;
+		    }
+		    
+		    //Draw page label
+		    menu.font_bold.draw(&menu.font_bold,
+		        "gameplay",
+		        312,
+		        217,
+		        FontAlign_Right
+		    );
+		    if(nomem == true)
+		    {
+			    //Draw mind games port version identification
+			    menu.font_arial.draw(&menu.font_arial,
+				"No memorycard inserted",
+				8,
+				8,
+				FontAlign_Left
+			    );
+		    }
+		    
+		    //Handle option and selection
+		    if (menu.next_page == menu.page && Trans_Idle())
+		    {
+		        //Change option
+		        if (pad_state.press & PAD_UP)
+		        {
+		            if (menu.select > 0)
+		                menu.select--;
+		            else
+		                menu.select = COUNT_OF(menu_options) - 1;
 		        }
-		        case 1:
-		        {   
-		            if (pad_state.press & (PAD_START | PAD_CROSS))
-		            {
-		                //Play Tutorial Music
-		                Audio_StopXA();
-		                Audio_PlayXA_Track(XA_Freeky, 0x40, 2, 1);
-		                Audio_WaitPlayXA();
-		                stage.prefs.menumusic=1;
-		                /*menu.next_page = MenuPage_Opening;
-				    menu.next_select = 0; //Mods
-				    Trans_Start();*/
-		            }
-		            break;
+		        if (pad_state.press & PAD_DOWN)
+		        {
+		            if (menu.select < COUNT_OF(menu_options) - 1)
+		                menu.select++;
+		            else
+		                menu.select = 0;
 		        }
-		        case 2:
-		        {   
-		            if (pad_state.press & (PAD_START | PAD_CROSS))
-		            {
-		                //Play Tutorial Music
-		                Audio_StopXA();
-		                Audio_PlayXA_Track(XA_Ludum, 0x40, 3, 1);
-		                Audio_WaitPlayXA();
-		                stage.prefs.menumusic=2;
-		                /*menu.next_page = MenuPage_Opening;
-				    menu.next_select = 0; //Mods
-				    Trans_Start();*/
-		            }
-		            break;
+		        
+		        //Handle option changing
+		        switch (menu_options[menu.select].type)
+		        {
+		            case OptType_Boolean:
+		                if (pad_state.press & (PAD_CROSS | PAD_LEFT | PAD_RIGHT))
+		                    *((boolean*)menu_options[menu.select].value) ^= 1;
+		                break;
+		            case OptType_Enum:
+				if (pad_state.press & PAD_LEFT)
+				{
+				            if (--*((s32*)menu_options[menu.select].value) < 0)
+				                *((s32*)menu_options[menu.select].value) = menu_options[menu.select].spec.spec_enum.max - 1;
+				}
+		                if (pad_state.press & PAD_RIGHT)
+		                    {
+				            if (++*((s32*)menu_options[menu.select].value) >= menu_options[menu.select].spec.spec_enum.max)
+				                *((s32*)menu_options[menu.select].value) = 0;
+		                    }
+		                break;
+		        }
+		        //Return to main menu if circle is pressed
+		        if (pad_state.press & PAD_CIRCLE)
+		        {	
+		            menu.next_page = MenuPage_Main;
+		            menu.next_select = 4; //Options
+		            Trans_Start();
 		        }
 		    }
-            //Initialize page
-            if (menu.page_swap)
-            {
-                menu.scroll = COUNT_OF(menu_options) * FIXED_DEC(24 + SCREEN_HEIGHT2,1);
-                menu.page_param.stage.diff = StageDiff_Normal;
-                stage.backpick = RandomRange(0, 2);
+		     //Draw box at the bottom
+				//Draw box at the bottom
+				RECT song_box = {0, 210, 320, 30};
+				Gfx_DrawRect(&song_box, 0, 0, 0);
+				
+				//Draw page label
+				menu.font_bold.draw(&menu.font_bold,
+					"options",
+					8,
+					7,
+					FontAlign_Left
+				);
+				//Draw box at the bottom
+				RECT top_box = {0, 0, 320, 30};
+				Gfx_DrawRect(&top_box, 0, 0, 0);
+			
+					
+		    //Draw options
+		    s32 next_scroll = menu.select * FIXED_DEC(8,1);
+		    menu.scroll += (next_scroll - menu.scroll) >> 1;
+		    
+		    for (u8 i = 0; i < COUNT_OF(menu_options); i++)
+		    {
+		        //Get position on screen
+		        s32 y = (i * 31) - 8;
+		        if (y <= -SCREEN_HEIGHT2 - 8)
+		            continue;
+		        if (y >= SCREEN_HEIGHT2 + 8)
+		            break;
+		            
+		        if(menu.select>3)
+		        	y = (i * 31) - 8 - (menu.scroll >> FIXED_SHIFT);
+		        
+		        //Draw text
+		        char text[0x80];
+		        switch (menu_options[i].type)
+		        {
+		            case OptType_Boolean:
+		            {
+		            	Menu_DrawOptions(*((boolean*)menu_options[i].value) + menu_options[i].optionsicon, 18, SCREEN_HEIGHT2 + y - 15 - 28, true);
+					sprintf(text, "%s %s", menu_options[i].text, *((boolean*)menu_options[i].value) ? "ON" : "OFF");
+				}
+		                break;
+		            case OptType_Enum:
+		            {
+		            		Menu_DrawOptions(*((s32*)menu_options[i].value) + menu_options[i].optionsicon, 2, SCREEN_HEIGHT2 + y - 15 - 28, false);
+		                	sprintf(text, "%s %s", menu_options[i].text, menu_options[i].spec.spec_enum.strs[*((s32*)menu_options[i].value)]);
+		                }
+		                break;
+		        }
+		        /*menu.font_bold.draw(&menu.font_bold,
+		            Menu_LowerIf(text, menu.select != i),
+		            48 + (y >> 2),
+		            SCREEN_HEIGHT2 + y - 8,
+		            FontAlign_Left
+		        );*/
+		        //Draw text
+			menu.font_bold.draw_col(&menu.font_bold,
+				Menu_LowerIf(text, NULL),
+				70,
+				SCREEN_HEIGHT2 + y - 34,
+				FontAlign_Left,
+				(menu.select == i) ? 128 : 64,
+				(menu.select == i) ? 128 : 64,
+				(menu.select == i) ? 128 : 64
+			);
+		    }
+		    
+		    //Draw background
+		    Menu_DrawBack(
+		        true,
+		        8,
+		        253 >> 1, 113 >> 1, 155 >> 1,
+		        0, 0, 0
+		    );
+		    break;
+            	}
+            	case 1:
+            	{
+            	    static const struct
+		    {
+			const char *text;
+			int music;
+			int icons;
+		    } menu_options[] = {
+		        {"GETTIN FREAKY", 0, 13},
+		        {"OG GETTIN FREAKY", 1, 14},
+		        {"LUDUM", 2, 15},
+		    };
+		    switch (menu_options[menu.select].music)
+			    {
+				case 0:
+				{   
+				    if (pad_state.press & (PAD_START | PAD_CROSS))
+				    {
+				        //Play Tutorial Music
+				        Audio_StopXA();
+				        Audio_PlayXA_Track(XA_GettinFreaky, 0x40, 0, 1);
+				        Audio_WaitPlayXA();
+				        stage.prefs.menumusic=0;
+				        /*menu.next_page = MenuPage_Opening;
+					    menu.next_select = 0; //Mods
+					    Trans_Start();*/
+				    }
+				    break;
+				}
+				case 1:
+				{   
+				    if (pad_state.press & (PAD_START | PAD_CROSS))
+				    {
+				        //Play Tutorial Music
+				        Audio_StopXA();
+				        Audio_PlayXA_Track(XA_Freeky, 0x40, 2, 1);
+				        Audio_WaitPlayXA();
+				        stage.prefs.menumusic=1;
+				        /*menu.next_page = MenuPage_Opening;
+					    menu.next_select = 0; //Mods
+
+					    Trans_Start();*/
+				    }
+				    break;
+				}
+				case 2:
+				{   
+				    if (pad_state.press & (PAD_START | PAD_CROSS))
+				    {
+				        //Play Tutorial Music
+				        Audio_StopXA();
+				        Audio_PlayXA_Track(XA_Ludum, 0x40, 3, 1);
+				        Audio_WaitPlayXA();
+				        stage.prefs.menumusic=2;
+				        /*menu.next_page = MenuPage_Opening;
+					    menu.next_select = 0; //Mods
+					    Trans_Start();*/
+				    }
+				    break;
+				}
+			    }
+		    //Initialize page
+		    if (menu.page_swap)
+		    {
+		        menu.scroll = COUNT_OF(menu_options) * FIXED_DEC(24 + SCREEN_HEIGHT2,1);
+		        menu.page_param.stage.diff = StageDiff_Normal;
+		    }
+		    //Draw page label
+		    menu.font_bold.draw(&menu.font_bold,
+		        "music",
+		        312,
+		        217,
+		        FontAlign_Right
+		    );
+		    if(nomem == true)
+		    {
+			    //Draw mind games port version identification
+			    menu.font_arial.draw(&menu.font_arial,
+				"No memorycard inserted",
+				8,
+				8,
+				FontAlign_Left
+			    );
+		    }
+		    //Handle option and selection
+		    if (menu.next_page == menu.page && Trans_Idle())
+		    {
+		        //Change option
+		        if (pad_state.press & PAD_UP)
+		        {
+		            if (menu.select > 0)
+		                menu.select--;
+		            else
+		                menu.select = COUNT_OF(menu_options) - 1;
+		        }
+		        if (pad_state.press & PAD_DOWN)
+		        {
+		            if (menu.select < COUNT_OF(menu_options) - 1)
+		                menu.select++;
+		            else
+		                menu.select = 0;
+		        }
+		        	
+		        
+		        //Return to main menu if circle is pressed
+		        if (pad_state.press & PAD_CIRCLE)
+		        {	
+		            menu.next_page = MenuPage_Main;
+		            menu.next_select = 4; //Options
+		            Trans_Start();
+		        }
+		    }
+		    //Draw box at the bottom
+				//Draw box at the bottom
+				RECT song_box = {0, 210, 320, 30};
+				Gfx_DrawRect(&song_box, 0, 0, 0);
+				
+				//Draw page label
+				menu.font_bold.draw(&menu.font_bold,
+					"options",
+					8,
+					7,
+					FontAlign_Left
+				);
+				//Draw box at the bottom
+				RECT top_box = {0, 0, 320, 30};
+				Gfx_DrawRect(&top_box, 0, 0, 0);
+				
+		    
+		    //Draw options
+		    s32 next_scroll = menu.select * FIXED_DEC(24,1);
+		    menu.scroll += (next_scroll - menu.scroll) >> 4;
+		    
+		    for (u8 i = 0; i < COUNT_OF(menu_options); i++)
+		    {
+		        //Get position on screen
+		        s32 y = (i * 24) - 8;
+		        if (y <= -SCREEN_HEIGHT2 - 8)
+		            continue;
+		        if (y >= SCREEN_HEIGHT2 + 8)
+		            break;
+		        
+		        Menu_DrawOptions(menu_options[i].icons, 18, SCREEN_HEIGHT2 + y - 15 - 28, true);
+		        
+		        //Draw text
+			menu.font_bold.draw_col(&menu.font_bold,
+				Menu_LowerIf(menu_options[i].text, NULL),
+				70,
+				SCREEN_HEIGHT2 + y - 34,
+				FontAlign_Left,
+				(menu.select == i) ? 128 : 64,
+				(menu.select == i) ? 128 : 64,
+				(menu.select == i) ? 128 : 64
+			);
+		    }
+		    
+		    //Draw background
+		    Menu_DrawBack(
+		        true,
+		        8,
+		        253 >> 1, 113 >> 1, 155 >> 1,
+		        0, 0, 0
+		    );
+		    break;
             }
-            
-            //Draw page label
-            menu.font_bold.draw(&menu.font_bold,
-                "music",
-                16,
-                SCREEN_HEIGHT - 32,
-                FontAlign_Left
-            );
-            //Handle option and selection
-            if (menu.next_page == menu.page && Trans_Idle())
-            {
-                //Change option
-                if (pad_state.press & PAD_UP)
-                {
-                    if (menu.select > 0)
-                        menu.select--;
-                    else
-                        menu.select = COUNT_OF(menu_options) - 1;
-                }
-                if (pad_state.press & PAD_DOWN)
-                {
-                    if (menu.select < COUNT_OF(menu_options) - 1)
-                        menu.select++;
-                    else
-                        menu.select = 0;
-                }
-                
-                //Return to main menu if circle is pressed
-                if (pad_state.press & PAD_CIRCLE)
-                {
-                    menu.next_page = MenuPage_Options;
-                    menu.next_select = 0; //Mods
-                    Trans_Start();
-                }
             }
-            
-            //Draw options
-            s32 next_scroll = menu.select * FIXED_DEC(24,1);
-            menu.scroll += (next_scroll - menu.scroll) >> 4;
-            
-            for (u8 i = 0; i < COUNT_OF(menu_options); i++)
-            {
-                //Get position on screen
-                s32 y = (i * 24) - 8 - (menu.scroll >> FIXED_SHIFT);
-                if (y <= -SCREEN_HEIGHT2 - 8)
-                    continue;
-                if (y >= SCREEN_HEIGHT2 + 8)
-                    break;
-                
-                //Draw text
-                menu.font_bold.draw(&menu.font_bold,
-                    Menu_LowerIf(menu_options[i].text, menu.select != i),
-                    48 + (y >> 2),
-                    SCREEN_HEIGHT2 + y - 8,
-                    FontAlign_Left
-                );
-            }
-            
-            //Draw background
-            fixed_t tgt_r = (fixed_t)((menu_options[menu.select].col >> 16) & 0xFF) << FIXED_SHIFT;
-            fixed_t tgt_g = (fixed_t)((menu_options[menu.select].col >>  8) & 0xFF) << FIXED_SHIFT;
-            fixed_t tgt_b = (fixed_t)((menu_options[menu.select].col >>  0) & 0xFF) << FIXED_SHIFT;
-            
-            menu.page_state.freeplay.back_r += (tgt_r - menu.page_state.freeplay.back_r) >> 4;
-            menu.page_state.freeplay.back_g += (tgt_g - menu.page_state.freeplay.back_g) >> 4;
-            menu.page_state.freeplay.back_b += (tgt_b - menu.page_state.freeplay.back_b) >> 4;
-            
-            Menu_DrawBack(
-                true,
-                8,
-                menu.page_state.freeplay.back_r >> (FIXED_SHIFT + 1),
-                menu.page_state.freeplay.back_g >> (FIXED_SHIFT + 1),
-                menu.page_state.freeplay.back_b >> (FIXED_SHIFT + 1),
-                0, 0, 0
-            );
             break;
         }
     #ifdef PSXF_NETWORK
@@ -3479,7 +3737,7 @@ void Menu_Tick(void)
                 {
                     //Load stage
                     Network_SetReady(false);
-                    stage.mode = menu.page_state.net_op.swap ? StageMode_Net2 : StageMode_Net1;
+                    stage.prefs.mode = menu.page_state.net_op.swap ? StageMode_Net2 : StageMode_Net1;
                     menu.next_page = MenuPage_Stage;
                     menu.page_param.stage.id = menu_options[menu.select].stage;
                     if (!menu_options[menu.select].diff)

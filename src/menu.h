@@ -20,7 +20,6 @@ typedef enum
 	MenuPage_Awards,
 	MenuPage_Credits,
 	MenuPage_Options,
-	MenuPage_Music,
 	MenuPage_Debug,
 	
 	#ifdef PSXF_NETWORK

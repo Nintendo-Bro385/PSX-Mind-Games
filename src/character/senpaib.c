@@ -41,7 +41,6 @@ enum
 	SenpaiB_ArcMain_Hit1,
 	SenpaiB_ArcMain_Hit2,
 	SenpaiB_ArcMain_Hit3,
-	SenpaiB_ArcMain_Hit4,
 	SenpaiB_ArcMain_Miss,
 	SenpaiB_ArcMain_Dead0,
 	
@@ -94,7 +93,7 @@ static const CharFrame char_senpaib_frame[] = {
 	{SenpaiB_ArcMain_Hit2, { 87, 116,  92, 116}, { 52,  95}}, //11 right 1
 	{SenpaiB_ArcMain_Hit3, {  0,   0,  91, 106}, { 52,  95}}, //12 right 2
 	
-	{SenpaiB_ArcMain_Hit4, { 0,   0,  88, 104}, { 57,  93}}, //13 left 1
+	{SenpaiB_ArcMain_Hit3, { 92,   0,  88, 104}, { 57,  93}}, //13 left 1
 
 	{SenpaiB_ArcMain_Miss, {  0,   0,  87, 112}, { 58, 101}}, //13
 	{SenpaiB_ArcMain_Miss, { 87,   0,  87, 104}, { 56,  94}}, //14
@@ -386,7 +385,6 @@ Character *Char_SenpaiB_New(fixed_t x, fixed_t y)
         "hit1.tim",
         "hit2.tim",
         "hit3.tim",
-        "hit4.tim",
 		"miss.tim",
 		"dead0.tim",
 		NULL

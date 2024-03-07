@@ -38,8 +38,6 @@ typedef struct
 	Gfx_Tex tex_junk; //tipped chair, table and spilled tea
 	
 	Gfx_Tex tex_junkred; //tipped chair, table and spilled tea
-
-	Gfx_Tex tex_fireplared; //ruined fireplace
 	
 	Gfx_Tex tex_fireplace; //ruined fireplacer
 
@@ -334,11 +332,7 @@ void Back_FlameC_DrawBG(StageBack *back)
 		FlameC_FireL_Draw(this, FIXED_DEC(-22,1) - fx, FIXED_DEC(11,1) - fy); //fire left
 		FlameC_FireR_Draw(this, FIXED_DEC(162,1) - fx, FIXED_DEC(1,1) - fy); //fire right
 		
-		if (phase2==1)
-		{
-		Stage_DrawTex(&this->tex_fireplared, &fireplace_src, &fireplace_dst, stage.camera.bzoom); //ruined fireplace
-		}
-		else
+		if (phase2==0)
 		{
 		Stage_DrawTex(&this->tex_fireplace, &fireplace_src, &fireplace_dst, stage.camera.bzoom); //ruined fireplace
 		}
@@ -348,7 +342,7 @@ void Back_FlameC_DrawBG(StageBack *back)
 		{
 			Gfx_BlendRect(&wholescreen, 147, 0, 34, 0); //phase 2 red overlay
 		}
-
+		Stage_DrawTex(&this->tex_fireplace, &fireplace_src, &fireplace_dst, stage.camera.bzoom); //ruined fireplace
 		Stage_DrawTex(&this->tex_back0, &halll_src, &halll_dst, stage.camera.bzoom); //wall left
 		Stage_DrawTex(&this->tex_back1, &hallr_src, &hallr_dst, stage.camera.bzoom); //wall right
 	}
@@ -396,7 +390,6 @@ StageBack *Back_FlameC_New(void)
 	Gfx_LoadTex(&this->tex_junk, Archive_Find(arc_back, "junk.tim"), 0);
 	Gfx_LoadTex(&this->tex_junkred, Archive_Find(arc_back, "junkred.tim"), 0);
 	Gfx_LoadTex(&this->tex_fireplace, Archive_Find(arc_back, "fplace.tim"), 0);
-	Gfx_LoadTex(&this->tex_fireplared, Archive_Find(arc_back, "fplared.tim"), 0);
 	Mem_Free(arc_back);
 
 	//load the flame arcs

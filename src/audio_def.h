@@ -32,7 +32,7 @@ static const XA_TrackDef xa_tracks[] = {
 	//CUTSCENE.XA
 	{XA_Cutscene, XA_LENGTH(1600)}, //XA_BFtransform
 	{XA_Cutscene, XA_LENGTH(800)}, //XA_Sendi
-	{XA_Cutscene, XA_LENGTH(1800)}, //XA_BFtdemo
+	{XA_Cutscene, XA_LENGTH(1300)}, //XA_BFtdemo
 	//WEEK3A.XA
 	{XA_Week3A, XA_LENGTH(11800)},  //XA_Flopchic
 	{XA_Week3A, XA_LENGTH(10000)}, //XA_Philly

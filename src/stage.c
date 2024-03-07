@@ -40,6 +40,7 @@ int diabox;
 int unpausedelay;
 int delay;
 
+boolean is_upscroll;
 boolean normo;
 boolean paused;
 boolean win;
@@ -96,18 +97,18 @@ static const struct
 	{0, {  0,   0,  88,  89}, {55, 33}}, //BF normal
 	{0, { 89,   0,  88,  89}, {55, 33}}, //BF confused
 	{1, {  0,   0, 129, 112}, {64, 56}}, //Psychic normal
-	{1, {130,   0, 117, 115}, {64, 56}}, //Psychic confused
+	{1, {130,   0, 117, 115}, {74, 56}}, //Psychic confused
 	{1, {  0, 113, 128, 117}, {64, 56}}, //Psychic excited
-	{1, {128, 115, 126, 122}, {64, 56}}, //Psychic shock
-	{2, {  0,   0, 128, 112}, {64, 56}}, //Psychic unamused
-	{2, {129,   0, 107, 104}, {64, 56}}, //Psychic annoyed
+	{1, {128, 115, 126, 122}, {58, 53}}, //Psychic shock
+	{2, {  0,   0, 128, 112}, {68, 56}}, //Psychic unamused
+	{2, {129,   0, 107, 104}, {54, 50}}, //Psychic annoyed
 	{3, {  0,   0,  78,  94}, {50, 36}}, //BF Senpai normal
 	{3, { 79,   0,  84,  99}, {50, 36}}, //BF Senpai shock
 	{3, {  0,  95,  79,  94}, {50, 36}}, //BF Senpai nervous
 	{3, { 80, 100,  79,  94}, {50, 36}}, //BF Senpai pissed
 	{4, {  0,   0,  83, 122}, {41, 61}}, //Spirit Normal
-	{5, {  0,   0, 112, 127}, {56, 63}}, //Floppa Normal
-	{5, {113,   0, 128,  95}, {56, 63}}, //Floppa Pissed
+	{5, {  0,   0, 112, 127}, {66, 23}}, //Floppa Normal
+	{5, {113,   0, 128,  95}, {70, 33}}, //Floppa Pissed
 };
 
 //welcome to the shitshow
@@ -188,6 +189,7 @@ boolean nohud;
 #include "character/flopchic.h"
 #include "character/sendai.h"
 #include "character/bft.h"
+#include "character/bftd.h"
 
 #include "stage/dummy.h"
 #include "stage/week1.h"
@@ -392,7 +394,7 @@ static u8 Stage_HitNote(PlayerState *this, u8 type, fixed_t offset)
     
     //Restore vocals and health
     Stage_StartVocal();
-    this->health += 230;
+    this->health += 400;
     if(this->health>=18000)
     {
         win=true;
@@ -474,7 +476,7 @@ static void Stage_NoteCheck(PlayerState *this, u8 type)
             this->arrow_hitan[type & 0x3] = stage.step_time;
             
             #ifdef PSXF_NETWORK
-                if (stage.mode >= StageMode_Net1)
+                if (stage.prefs.mode >= StageMode_Net1)
                 {
                     //Send note hit packet
                     Packet note_hit;
@@ -522,7 +524,7 @@ static void Stage_NoteCheck(PlayerState *this, u8 type)
             this->arrow_hitan[type & 0x3] = -1;
             
             #ifdef PSXF_NETWORK
-                if (stage.mode >= StageMode_Net1)
+                if (stage.prefs.mode >= StageMode_Net1)
                 {
                     //Send note hit packet
                     Packet note_hit;
@@ -563,7 +565,7 @@ static void Stage_NoteCheck(PlayerState *this, u8 type)
         this->refresh_score = true;
         
         #ifdef PSXF_NETWORK
-            if (stage.mode >= StageMode_Net1)
+            if (stage.prefs.mode >= StageMode_Net1)
             {
                 //Send note hit packet
                 Packet note_hit;
@@ -604,7 +606,7 @@ static void Stage_SustainCheck(PlayerState *this, u8 type)
         this->arrow_hitan[type & 0x3] = stage.step_time;
             
         #ifdef PSXF_NETWORK
-            if (stage.mode >= StageMode_Net1)
+            if (stage.prefs.mode >= StageMode_Net1)
             {
                 //Send note hit packet
                 Packet note_hit;
@@ -889,7 +891,7 @@ static void Stage_DrawStrum(u8 i, RECT *note_src, RECT_FIXED *note_dst)
 static void Stage_DrawNotes(void)
 {
 	//Check if opponent should draw as bot
-	u8 bot = (stage.mode == StageMode_2P) ? 0 : NOTE_FLAG_OPPONENT;
+	u8 bot = (stage.prefs.mode == StageMode_2P) ? 0 : NOTE_FLAG_OPPONENT;
 	
 	//Initialize scroll state
 	SectionScroll scroll;
@@ -942,7 +944,7 @@ static void Stage_DrawNotes(void)
 			//Miss note if player's note
 			if (!(note->type & (bot | NOTE_FLAG_HIT | NOTE_FLAG_MINE)))
 			{
-				if (stage.mode < StageMode_Net1 || i == ((stage.mode == StageMode_Net1) ? 0 : 1))
+				if (stage.prefs.mode < StageMode_Net1 || i == ((stage.prefs.mode == StageMode_Net1) ? 0 : 1))
 				{
 					//Missed note
 					Stage_CutVocal();
@@ -954,7 +956,7 @@ static void Stage_DrawNotes(void)
 					
 					//Send miss packet
 					#ifdef PSXF_NETWORK
-						if (stage.mode >= StageMode_Net1)
+						if (stage.prefs.mode >= StageMode_Net1)
 						{
 							//Send note hit packet
 							Packet note_hit;
@@ -1199,7 +1201,7 @@ void Stage_DrawBox()
 //Stage loads
 static void Stage_SwapChars(void)
 {
-    if (stage.mode == StageMode_Swap)
+    if (stage.prefs.mode == StageMode_Swap)
     {
         Character *temp = stage.player;
         stage.player = stage.opponent;
@@ -1315,7 +1317,7 @@ static void Stage_LoadChart(void)
     #endif
     
     //Swap chart
-    if (stage.mode == StageMode_Swap)
+    if (stage.prefs.mode == StageMode_Swap)
     {
         for (Note *note = stage.notes; note->pos != 0xFFFF; note++)
             note->type ^= NOTE_FLAG_OPPONENT;
@@ -1339,7 +1341,7 @@ static void Stage_LoadChart(void)
         else
             stage.player_state[0].max_score += 35;
     }
-    if (stage.mode >= StageMode_2P && stage.player_state[1].max_score > stage.player_state[0].max_score)
+    if (stage.prefs.mode >= StageMode_2P && stage.player_state[1].max_score > stage.player_state[0].max_score)
         stage.max_score = stage.player_state[1].max_score;
     else
         stage.max_score = stage.player_state[0].max_score;
@@ -1443,6 +1445,14 @@ static void Stage_LoadState(void)
     normo = false;
     paused = false;
     win=false;
+    if(stage.prefs.downscroll==true)
+    {
+    	is_upscroll =false;
+    }
+    else
+    {
+    	is_upscroll =true;
+    }
     
         if(stage.stage_diff == StageDiff_Easy){pausediff = "EASY";}
 	if(stage.stage_diff == StageDiff_Normal){pausediff = "NORMAL";}
@@ -1973,7 +1983,7 @@ void Stage_Load(StageId id, StageDiff difficulty, boolean story)
     stage.sbump = FIXED_UNIT;
     
     //Initialize stage according to mode
-    stage.note_swap = (stage.mode == StageMode_Swap) ? 4 : 0;
+    stage.note_swap = (stage.prefs.mode == StageMode_Swap) ? 4 : 0;
     
     //Load music
     stage.note_scroll = 0;
@@ -1983,14 +1993,14 @@ void Stage_Load(StageId id, StageDiff difficulty, boolean story)
     stage.offset = 0;
     
     #ifdef PSXF_NETWORK
-    if (stage.mode >= StageMode_Net1 && Network_IsHost())
+    if (stage.prefs.mode >= StageMode_Net1 && Network_IsHost())
     {
         //Send ready packet to peer
         Packet ready;
         ready[0] = PacketType_Ready;
         ready[1] = id;
         ready[2] = difficulty;
-        ready[3] = (stage.mode == StageMode_Net1) ? 1 : 0;
+        ready[3] = (stage.prefs.mode == StageMode_Net1) ? 1 : 0;
         Network_Send(&ready);
     }
     #endif
@@ -1999,8 +2009,8 @@ void Stage_Load(StageId id, StageDiff difficulty, boolean story)
 void Stage_Unload(void)
 {
     //Disable net mode to not break the game
-    if (stage.mode >= StageMode_Net1)
-        stage.mode = StageMode_Normal;
+    if (stage.prefs.mode >= StageMode_Net1)
+        stage.prefs.mode = StageMode_Normal;
     
     //Unload stage background
     if (stage.back != NULL)
@@ -2123,7 +2133,7 @@ void Stage_Tick(void)
     
     //Tick transition
     #ifdef PSXF_NETWORK
-    if (stage.mode >= StageMode_Net1)
+    if (stage.prefs.mode >= StageMode_Net1)
     {
         //Show disconnect screen when disconnected
         if (!(Network_Connected() && Network_HasPeer()))
@@ -2228,11 +2238,11 @@ void Stage_Tick(void)
     {
         case StageState_Play:
         {
-        	if(stage.mode == StageMode_Swap)
+        	if(stage.prefs.mode == StageMode_Swap)
         	{
         	stage.prefs.swap_awards =true;
         	}
-        	if(stage.mode == StageMode_2P)
+        	if(stage.prefs.mode == StageMode_2P)
         	{
         		if (pad_state_2.press & PAD_CROSS)
         		{
@@ -2271,7 +2281,7 @@ void Stage_Tick(void)
         	}
         	if(paused == false)
         	{
-		        if (pad_state.press & PAD_START && stage.stage_id != StageId_1_5 && stage.stage_id != StageId_1_6)
+		        if (pad_state.press & PAD_START && stage.stage_id != StageId_1_5 && stage.stage_id != StageId_1_6 && stage.stage_id != StageId_3_1)
 			{
 			    stage.pause_select = 0;
 			    unpausedelay=6;
@@ -2356,6 +2366,11 @@ void Stage_Tick(void)
 				    }
 				    if(unpausedelay<=-1)
 				    {
+				    	if(is_upscroll ==true)
+				    		stage.prefs.downscroll =0;
+				    	else
+				    		stage.prefs.downscroll =1;
+				    		
 				    	paused = false;
 					Audio_ResumeXA();
 				    }
@@ -2363,6 +2378,10 @@ void Stage_Tick(void)
 			      case 1: //Retry
 			        if (pad_state.press & (PAD_START | PAD_CROSS))
 			  	{
+			  		if(is_upscroll ==true)
+				    		stage.prefs.downscroll =0;
+				    	else
+				    		stage.prefs.downscroll =1;
 					stage.trans = StageTrans_Reload;
 					Trans_Start();
 				}
@@ -2384,6 +2403,10 @@ void Stage_Tick(void)
 				}
 				if (pad_state.press & (PAD_START | PAD_CROSS))
 			  	{
+			  		if(is_upscroll ==true)
+				    		stage.prefs.downscroll =0;
+				    	else
+				    		stage.prefs.downscroll =1;
 			  		stage.trans = StageTrans_Reload;
 					Trans_Start();
 			  	}
@@ -2398,6 +2421,10 @@ void Stage_Tick(void)
 			      case 3: //Quit
 			        if (pad_state.press & (PAD_START | PAD_CROSS))
 			  	{
+			  		if(is_upscroll ==true)
+				    		stage.prefs.downscroll =0;
+				    	else
+				    		stage.prefs.downscroll =1;
 				stage.trans = StageTrans_Menu;
 				Trans_Start();
 				}
@@ -2437,7 +2464,7 @@ void Stage_Tick(void)
             fixed_t next_scroll;
             
             Stage_Note_Move();
-	    if (stage.prefs.botplay && stage.stage_id != StageId_1_5 && stage.stage_id != StageId_1_6)
+	    if (stage.prefs.botplay && stage.stage_id != StageId_1_5 && stage.stage_id != StageId_1_6 && stage.stage_id != StageId_3_1)
 	    {
     			Menu_DrawBot(126, 49);
 	    }
@@ -2617,11 +2644,13 @@ void Stage_Tick(void)
                         stage.notemode = 7;
                    	if (stage.prefs.downscroll == 0 && stopdownscroll == 0)
                    	{
+                   	is_upscroll=true;
                         stage.prefs.downscroll =1;
                         stopdownscroll = 1;
                         }
                         else if (stage.prefs.downscroll == 1 && stopdownscroll == 0)
                         {
+                        is_upscroll=false;
                         stage.prefs.downscroll =0;
                         stopdownscroll = 1;
                         }
@@ -2656,11 +2685,13 @@ void Stage_Tick(void)
                     case 703:
                     	if (stage.prefs.downscroll == 1 && stopdownscroll == 0)
                    	{
+                   	is_upscroll=true;
                         stage.prefs.downscroll =0;
                         stopdownscroll = 1;
                         }
                         else if (stage.prefs.downscroll == 0 && stopdownscroll == 0)
                         {
+                        is_upscroll=false;
                         stage.prefs.downscroll =1;
                         stopdownscroll = 1;
                         }
@@ -2736,6 +2767,8 @@ void Stage_Tick(void)
                nohud = 0;
             if (stage.stage_id == StageId_2_3)
                nohud = 0;
+            if (stage.stage_id == StageId_3_1)
+            nohud = 1;
 		
 		if (stage.stage_id == StageId_2_3)
             {
@@ -2819,7 +2852,7 @@ void Stage_Tick(void)
             }
             
             #ifdef PSXF_NETWORK
-            if (stage.mode >= StageMode_Net1 && !Network_IsReady())
+            if (stage.prefs.mode >= StageMode_Net1 && !Network_IsReady())
             {
                 if (!Network_IsHost())
                 {
@@ -3120,7 +3153,7 @@ void Stage_Tick(void)
                 Stage_FocusCharacter(stage.player, FIXED_UNIT / 24);
             Stage_ScrollCamera();
             
-            switch (stage.mode)
+            switch (stage.prefs.mode)
             {
                 case StageMode_Normal:
                 case StageMode_Swap:
@@ -3211,11 +3244,11 @@ void Stage_Tick(void)
             }
             
             //Draw score
-			for (int i = 0; i < ((stage.mode >= StageMode_2P) ? 2 : 1); i++)
+			for (int i = 0; i < ((stage.prefs.mode >= StageMode_2P) ? 2 : 1); i++)
 			{
 				PlayerState *this = &stage.player_state[i];
 				
-				if(stage.stage_id != StageId_1_5 && stage.stage_id != StageId_1_6)
+				if(stage.stage_id != StageId_1_5 && stage.stage_id != StageId_1_6 && stage.stage_id != StageId_3_1)
 				{
 				if ((this->refresh_score || this->refresh_misses))
 				{
@@ -3235,15 +3268,15 @@ void Stage_Tick(void)
 					this->refresh_score = false;
 					this->refresh_misses = false;
 				}
-				if(stage.mode == StageMode_2P)
+				if(stage.prefs.mode == StageMode_2P)
 				{
 					if (stage.prefs.downscroll)
 					{
-					stage.font_cdr.draw(&stage.font_cdr, this->score_text, (i ^ (stage.mode == StageMode_Swap)) ? 170 - 80 : 170 + 80, 35, FontAlign_Center);
+					stage.font_cdr.draw(&stage.font_cdr, this->score_text, (i ^ (stage.prefs.mode == StageMode_Swap)) ? 170 - 80 : 170 + 80, 35, FontAlign_Center);
 					}
 					else
 					{
-					stage.font_cdr.draw(&stage.font_cdr, this->score_text, (i ^ (stage.mode == StageMode_Swap)) ? 170 - 80 : 170 + 80, 220, FontAlign_Center);
+					stage.font_cdr.draw(&stage.font_cdr, this->score_text, (i ^ (stage.prefs.mode == StageMode_Swap)) ? 170 - 80 : 170 + 80, 220, FontAlign_Center);
 					}
 				}
 				else
@@ -3261,7 +3294,7 @@ void Stage_Tick(void)
 					
 			}
             
-            if (stage.mode < StageMode_2P)
+            if (stage.prefs.mode < StageMode_2P)
             {
                 //Perform health checks
                 if (stage.player_state[0].health <= 0)
@@ -3276,7 +3309,7 @@ void Stage_Tick(void)
                 //Draw health heads
                 Stage_DrawHealth(stage.player_state[0].health, stage.player->health_i,    1);
                 Stage_DrawHealth(stage.player_state[0].health, stage.opponent->health_i, -1);
-                if(stage.mode == StageMode_Swap)
+                if(stage.prefs.mode == StageMode_Swap)
                 {
                 if (stage.stage_id == StageId_1_1)
                 {
@@ -3633,7 +3666,7 @@ void Stage_Tick(void)
                 {"...No matter...", 0, Dialogue_Spirit_Normal, 0},
                 {"...I'll just kill you and finally get\nmy revenge... It's really that simple...", 0, Dialogue_Spirit_Normal, 0},
                 {"...You don't mind your body being\ndissipated, right? It's only fair...", 0, Dialogue_Spirit_Normal, 0},
-                {"You took the words straight from my mouth.", 1, Dialogue_Psychic_Excited, 0},
+                {"You took the words straight\nfrom my mouth.", 1, Dialogue_Psychic_Excited, 0},
             };
 
             static Dialogue_Struct latedrivedia[] = {
@@ -3641,9 +3674,9 @@ void Stage_Tick(void)
                 {"Where are we?", 1, Dialogue_Psychic_Normal, 0},
                 {"Beep?", 0, Dialogue_BF_Confused, 0},
                 {"That much is obvious.", 1, Dialogue_Psychic_Unamused, 0},
-                {"It seems that we are stuck in some sort of\nalternate reality...", 1, Dialogue_Psychic_Confused, 0},
+                {"It seems that we are stuck in some sort\nof alternate reality...", 1, Dialogue_Psychic_Confused, 0},
                 {"Eep skee dah?", 0, Dialogue_BF_Normal, 0},
-                {"Since we're here anyway, I suppose one song\ncouldn't hurt.", 1, Dialogue_Psychic_Normal, 0},
+                {"Since we're here anyway, I suppose one\nsong couldn't hurt.", 1, Dialogue_Psychic_Normal, 0},
             };
             static Dialogue_Struct flopdia[] = {
                 {"Meow!", 1, Dialogue_Floppa_Normal, 0},
@@ -3830,12 +3863,12 @@ void Stage_NetHit(Packet *packet)
     Note *note = &stage.notes[i];
     u8 type = note->type & 0x3;
     
-    u8 opp_flag = (stage.mode == StageMode_Net1) ? NOTE_FLAG_OPPONENT : 0;
+    u8 opp_flag = (stage.prefs.mode == StageMode_Net1) ? NOTE_FLAG_OPPONENT : 0;
     if ((note->type & NOTE_FLAG_OPPONENT) != opp_flag)
         return;
     
     //Update game state
-    PlayerState *this = &stage.player_state[(stage.mode == StageMode_Net1) ? 1 : 0];
+    PlayerState *this = &stage.player_state[(stage.prefs.mode == StageMode_Net1) ? 1 : 0];
     stage.notes[i].type |= NOTE_FLAG_HIT;
     
     this->score = hit_score;
@@ -3904,7 +3937,7 @@ void Stage_NetMiss(Packet *packet)
     u32 hit_score = ((*packet)[2] << 0) | ((*packet)[3] << 8) | ((*packet)[4] << 16) | ((*packet)[5] << 24);
     
     //Update game state
-    PlayerState *this = &stage.player_state[(stage.mode == StageMode_Net1) ? 1 : 0];
+    PlayerState *this = &stage.player_state[(stage.prefs.mode == StageMode_Net1) ? 1 : 0];
     
     this->score = hit_score;
     this->refresh_score = true;

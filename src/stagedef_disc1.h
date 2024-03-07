@@ -131,7 +131,7 @@
 		XA_Psy, 0,
 		{"\\PORTRAIT\\BF.ARC;1", "\\PORTRAIT\\PSYCHIC.ARC;1"},
 		
-		StageId_2_2, STAGE_LOAD_FLAG | STAGE_LOAD_STAGE
+		StageId_3_1, STAGE_LOAD_FLAG | STAGE_LOAD_PLAYER
 	},
 	{ //StageId_2_2 (South)
 		//Characters
@@ -174,22 +174,22 @@
 	
 	{ //StageId_3_1 (Pico)
 		//Characters
-		{Char_BF_New,      FIXED_DEC(225,1),  FIXED_DEC(138,1)},
-		{Char_OldPsychic_New,  FIXED_DEC(16,1),  FIXED_DEC(118,1)},
-		{Char_Psychic_New,       FIXED_DEC(115,1),  FIXED_DEC(37,1)},
+		{Char_Bftd_New,    FIXED_DEC(190,1),  FIXED_DEC(130,1)},
+		{Char_OldPsychic_New, FIXED_DEC(-16,1),  FIXED_DEC(112,1)},
+		{Char_GF_New,      FIXED_DEC(115,1),  FIXED_DEC(37,1)},
 		
 		//Stage background
-		Back_Chop_New,
+		Back_Old_New,
 		
 		//Song info
 		{FIXED_DEC(12,10),FIXED_DEC(14,10),FIXED_DEC(16,10)},
 		3, 1,
-		XA_Flopchic, 0,
+		XA_BFtdemo, 2,
 		0,
 		XA_Clucked, 2,
 		{NULL, NULL},
 		
-		StageId_3_2, STAGE_LOAD_FLAG
+		StageId_2_2, STAGE_LOAD_FLAG | STAGE_LOAD_STAGE | STAGE_LOAD_PLAYER
 	},
 	{ //StageId_3_2 (Philly)
 		//Characters

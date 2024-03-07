@@ -40,6 +40,7 @@ all: \
 	iso/menu/characters/mpsy.arc \
 	iso/sendai/main.arc \
 	iso/bft/hell.arc \
+	iso/bftd/scream.arc \
 	iso/week1/back.arc \
 	iso/fplacechop/back.arc \
 	iso/flopchop/back.arc \
@@ -57,7 +58,7 @@ iso/%.arc:
 	tools/funkinarcpak/funkinarcpak $@ $^
 
 # Menu
-iso/menu/menu.arc: iso/menu/back.tim iso/menu/back1.tim iso/menu/back2.tim iso/menu/ng.tim iso/menu/story.tim iso/menu/title.tim iso/menu/hud1.tim iso/menu/hud2.tim
+iso/menu/menu.arc: iso/menu/back.tim iso/menu/back1.tim iso/menu/back2.tim iso/menu/ng.tim iso/menu/story.tim iso/menu/options/options.tim iso/menu/title.tim iso/menu/hud1.tim iso/menu/hud2.tim
 
 iso/menu/backgrounds/week.arc: iso/menu/backgrounds/week0.tim iso/menu/backgrounds/week1.tim iso/menu/backgrounds/week2.tim iso/menu/backgrounds/week3.tim iso/menu/backgrounds/week4.tim iso/menu/backgrounds/week5.tim iso/menu/backgrounds/week6.tim iso/menu/backgrounds/week7.tim
 
@@ -88,7 +89,7 @@ iso/oldpsychic/main.arc: iso/oldpsychic/idle0.tim iso/oldpsychic/idle1.tim iso/o
 iso/psychic/main.arc: iso/psychic/idle0.tim iso/psychic/idle1.tim iso/psychic/idle2.tim iso/psychic/idle3.tim iso/psychic/idle4.tim iso/psychic/idle5.tim iso/psychic/left0.tim iso/psychic/left1.tim iso/psychic/down0.tim iso/psychic/down1.tim iso/psychic/up.tim iso/psychic/right0.tim iso/psychic/right1.tim iso/psychic/right2.tim iso/psychic/right3.tim iso/psychic/missl.tim iso/psychic/missd.tim iso/psychic/missu.tim iso/psychic/missr.tim iso/psychic/upalt0.tim iso/psychic/upalt1.tim iso/psychic/upalt2.tim iso/psychic/upalt3.tim iso/psychic/upalt4.tim iso/psychic/upalt5.tim
 
 # Senpai
-iso/senpaib/main.arc: iso/senpaib/hit0.tim iso/senpaib/hit1.tim iso/senpaib/hit2.tim iso/senpaib/hit3.tim iso/senpaib/hit4.tim iso/senpaib/miss.tim iso/senpaib/dead0.tim
+iso/senpaib/main.arc: iso/senpaib/hit0.tim iso/senpaib/hit1.tim iso/senpaib/hit2.tim iso/senpaib/hit3.tim iso/senpaib/miss.tim iso/senpaib/dead0.tim
 
 iso/senpaib/dead.arc: iso/senpaib/dead1.tim iso/senpaib/dead2.tim
 
@@ -119,6 +120,8 @@ iso/sendai/main.arc: iso/sendai/panic.tim iso/sendai/pain0.tim iso/sendai/pain1.
 #insanity
 iso/bft/hell.arc: iso/bft/idle.tim iso/bft/oof.tim iso/bft/eh.tim iso/bft/eey.tim iso/bft/ack.tim iso/bft/beh.tim iso/bft/agga.tim iso/bft/deh.tim iso/bft/ded.tim iso/bft/switch0.tim iso/bft/switch1.tim iso/bft/switch2.tim iso/bft/switch3.tim iso/bft/switch4.tim iso/bft/switch5.tim iso/bft/switch6.tim iso/bft/wink0.tim iso/bft/wink1.tim iso/bft/wink2.tim
 
+iso/bftd/scream.arc: iso/bftd/idle0.tim iso/bftd/idle1.tim iso/bftd/idle2.tim iso/bftd/idle3.tim
+
 # Week 1
 iso/week1/back.arc: iso/week1/back0.tim iso/week1/back1.tim
 
@@ -127,7 +130,7 @@ iso/fplacechop/back.arc: iso/fplacechop/back0.tim iso/fplacechop/back0p.tim iso/
 iso/flopchop/back.arc: iso/flopchop/back0.tim iso/flopchop/back1.tim iso/flopchop/floor.tim iso/flopchop/junk.tim iso/flopchop/fplace.tim
 
 #flamec chop
-iso/flamec/back.arc: iso/flamec/back0.tim iso/flamec/back1.tim iso/flamec/floor.tim iso/flamec/fplace.tim iso/flamec/fplared.tim iso/flamec/junk.tim iso/flamec/junkred.tim
+iso/flamec/back.arc: iso/flamec/back0.tim iso/flamec/back1.tim iso/flamec/floor.tim iso/flamec/fplace.tim iso/flamec/junk.tim iso/flamec/junkred.tim
 iso/flamec/firel.arc: iso/flamec/firel0.tim iso/flamec/firel1.tim
 iso/flamec/firem.arc: iso/flamec/firem0.tim iso/flamec/firem1.tim
 iso/flamec/firer.arc: iso/flamec/firer0.tim iso/flamec/firer1.tim

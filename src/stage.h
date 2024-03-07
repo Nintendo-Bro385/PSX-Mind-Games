@@ -20,10 +20,10 @@
 #include "network.h"
 
 //Stage constants
-#define INPUT_LEFT  (PAD_LEFT  | PAD_SQUARE)
-#define INPUT_DOWN  (PAD_DOWN  | PAD_CROSS)
-#define INPUT_UP    (PAD_UP    | PAD_TRIANGLE)
-#define INPUT_RIGHT (PAD_RIGHT | PAD_CIRCLE)
+#define INPUT_LEFT  (PAD_LEFT  | PAD_SQUARE | PAD_L2)
+#define INPUT_DOWN  (PAD_DOWN  | PAD_CROSS | PAD_L1)
+#define INPUT_UP    (PAD_UP    | PAD_TRIANGLE | PAD_R1)
+#define INPUT_RIGHT (PAD_RIGHT | PAD_CIRCLE | PAD_R2)
 
 #define STAGE_FLAG_JUST_STEP     (1 << 0) //Song just stepped this frame
 #define STAGE_FLAG_VOCAL_ACTIVE  (1 << 1) //Song's vocal track is currently active
@@ -181,13 +181,12 @@ typedef struct
 		//Stage settings
 		boolean ghost, downscroll, botplay, lowquality, secretunlocked, secretunlocked2, expsync;
 		int menumusic;
+		s32 mode;
 		//int psymisses, wiltmisses, uproarmisses;
 		boolean bweek_awards, mpsy_awards, mwilt_awards, mup_awards, dsu_awards, udemo_awards, bdweek_awards, flopg_awards, swap_awards, two_awards, debugger_awards, nomissfw, nomissdw, no_memory_card;
 	}prefs;
 	
 	boolean loadsaveonce;
-	
-	s32 mode;
 	
 	u32 offset;
 	

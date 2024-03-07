@@ -89,13 +89,22 @@
 				<file name = "2.2n.cht" type = "data" source = "iso/chart/latedrive.json.cht"/>
 				<file name = "2.2h.cht" type = "data" source = "iso/chart/latedrive-hard.json.cht"/>
 				<!-- Monster charts -->
-				<file name = "2.3e.cht" type = "data" source = "iso/chart/psychic-easy.json.cht"/>
-				<file name = "2.3n.cht" type = "data" source = "iso/chart/psychic.json.cht"/>
+				<file name = "2.3e.cht" type = "data" source = "iso/chart/psychic-hard.json.cht"/>
+				<file name = "2.3n.cht" type = "data" source = "iso/chart/psychic-hard.json.cht"/>
 				<file name = "2.3h.cht" type = "data" source = "iso/chart/psychic-hard.json.cht"/>
 				<!-- Clucked charts -->
 				<file name = "2.4e.cht" type = "data" source = "iso/chart/clucked-easy.json.cht"/>
 				<file name = "2.4n.cht" type = "data" source = "iso/chart/clucked.json.cht"/>
 				<file name = "2.4h.cht" type = "data" source = "iso/chart/clucked-hard.json.cht"/>
+			</dir>
+			
+			<!-- Week 3 assets -->
+			<dir name = "week3">
+				
+				<!-- Spookeez charts -->
+				<file name = "3.1e.cht" type = "data" source = "iso/chart/blank.json.cht"/>
+				<file name = "3.1n.cht" type = "data" source = "iso/chart/blank.json.cht"/>
+				<file name = "3.1h.cht" type = "data" source = "iso/chart/blank.json.cht"/>
 			</dir>
 			
 			<dir name = "psyche">
@@ -165,6 +174,7 @@
 				
 				<file name = "sendai.arc" type = "data" source = "iso/sendai/main.arc"/>
 				<file name = "bft.arc" type = "data" source = "iso/bft/hell.arc"/>
+				<file name = "scream.arc" type = "data" source = "iso/bftd/scream.arc"/>
 			</dir>
 			
 			<!-- Music -->
